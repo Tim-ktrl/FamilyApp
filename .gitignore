@@ -1,0 +1,21 @@
+# CMake build output
+build/
+build-*/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# Qt Creator local files
+*.user
+*.user.*
+*.autosave
+
+# Android build output
+android-build/
+*.apk
+*.aab
+
+# VS Code temporary files
+.vscode/*.log
