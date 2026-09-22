@@ -1,0 +1,6 @@
+module PocketHello
+typeinfo appPocketHello.qmltypes
+prefer :/qt/qml/PocketHello/
+Main 1.0 Main.qml
+depends QtQuick
+

@@ -7,7 +7,7 @@ ApplicationWindow {
     visible: true
     width: 390
     height: 720
-    title: "Family App"
+    title: "Pocket Hello"
 
     property int tapCount: 0
 
@@ -27,7 +27,10 @@ ApplicationWindow {
 
         Text {
             width: parent.width
-            text: tapCount === 0 ? "Press the button to test the app." : "You tapped the button " + tapCount + " time" + (tapCount === 1 ? "." : "s.")
+            text: tapCount === 0
+                  ? "Press the button to test the app."
+                  : "You tapped the button " + tapCount + " time"
+                    + (tapCount === 1 ? "." : "s.")
 
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: 18
@@ -39,7 +42,7 @@ ApplicationWindow {
             text: "Tap me"
 
             onClicked: {
-                tapCount += 2;
+                tapCount += 2
             }
         }
 
@@ -48,7 +51,7 @@ ApplicationWindow {
             text: "Reset"
 
             onClicked: {
-                tapCount = 0;
+                tapCount = 0
             }
         }
     }

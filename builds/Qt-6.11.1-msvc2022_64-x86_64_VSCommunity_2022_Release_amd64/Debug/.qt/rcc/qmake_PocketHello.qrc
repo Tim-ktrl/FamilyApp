@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/PocketHello">
+    <file alias="qmldir">C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/PocketHello/qmldir</file>
+  </qresource>
+</RCC>
+

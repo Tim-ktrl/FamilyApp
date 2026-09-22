@@ -1,0 +1,14 @@
+-rootPath
+C:/Users/kijja/FamilyApp
+-cmake-output
+-output-file
+C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/qml_imports/appPocketHello_conf.cmake
+-importPath
+C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug
+-importPath
+C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/PocketHello
+-importPath
+C:/Qt/6.11.1/msvc2022_64/qml
+-qrcFiles
+C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/qmake_PocketHello.qrc
+C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/appPocketHello_raw_qml_0.qrc
