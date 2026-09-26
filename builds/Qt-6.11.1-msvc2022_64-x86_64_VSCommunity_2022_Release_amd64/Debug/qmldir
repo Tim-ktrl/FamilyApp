@@ -1,0 +1,10 @@
+module FamilyApp
+linktarget appFamilyAppplugin
+optional plugin appFamilyAppplugin
+classname FamilyAppPlugin
+typeinfo appFamilyApp.qmltypes
+prefer :/qt/qml/FamilyApp/
+Main 1.0 Main.qml
+ShoppingListPage 1.0 ShoppingListPage.qml
+SavedItemsPage 1.0 SavedItemsPage.qml
+

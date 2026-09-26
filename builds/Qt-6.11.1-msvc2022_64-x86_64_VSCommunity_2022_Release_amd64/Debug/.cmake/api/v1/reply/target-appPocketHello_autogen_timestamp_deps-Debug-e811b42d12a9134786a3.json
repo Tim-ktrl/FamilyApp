@@ -65,19 +65,19 @@
 		},
 		{
 			"backtrace" : 0,
-			"id" : "generate_qmlls_build_ini_file::@6890427a1f51a3e7e1df"
+			"id" : "appPocketHello_qmlimportscan::@6890427a1f51a3e7e1df"
 		},
 		{
 			"backtrace" : 4,
 			"id" : "appPocketHello_copy_qml::@6890427a1f51a3e7e1df"
 		},
 		{
-			"backtrace" : 6,
-			"id" : "appPocketHello_copy_res::@6890427a1f51a3e7e1df"
+			"backtrace" : 0,
+			"id" : "generate_qmlls_build_ini_file::@6890427a1f51a3e7e1df"
 		},
 		{
-			"backtrace" : 0,
-			"id" : "appPocketHello_qmlimportscan::@6890427a1f51a3e7e1df"
+			"backtrace" : 6,
+			"id" : "appPocketHello_copy_res::@6890427a1f51a3e7e1df"
 		}
 	],
 	"folder" : 

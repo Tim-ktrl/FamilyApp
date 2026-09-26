@@ -2,15 +2,13 @@
 -I
 C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug
 -I
-C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/PocketHello
--I
 C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug
 -I
 C:/Qt/6.11.1/msvc2022_64/qml
 --resource
-C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/qmake_PocketHello.qrc
+C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/qmake_FamilyApp.qrc
 --resource
-C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/appPocketHello_raw_qml_0.qrc
+C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/appFamilyApp_raw_qml_0.qrc
 C:/Users/kijja/FamilyApp/Main.qml
 C:/Users/kijja/FamilyApp/ShoppingListPage.qml
 C:/Users/kijja/FamilyApp/SavedItemsPage.qml

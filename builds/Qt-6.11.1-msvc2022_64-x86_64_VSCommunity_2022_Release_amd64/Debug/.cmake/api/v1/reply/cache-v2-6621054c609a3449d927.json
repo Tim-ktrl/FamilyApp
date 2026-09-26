@@ -1335,11 +1335,11 @@
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "The CMake toolchain file"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/qt.toolchain.cmake"
+			"value" : "c:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/qt.toolchain.cmake"
 		},
 		{
 			"name" : "CMAKE_VERBOSE_MAKEFILE",

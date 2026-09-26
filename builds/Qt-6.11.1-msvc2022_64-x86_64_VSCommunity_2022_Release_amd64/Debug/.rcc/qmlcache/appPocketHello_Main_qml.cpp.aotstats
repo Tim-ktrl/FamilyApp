@@ -10,96 +10,48 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 30,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 34,
-                            "durationMicroseconds": 0,
-                            "functionName": "horizontalAlignment",
-                            "line": 39,
+                            "line": 40,
                             "message": ""
                         },
                         {
                             "codegenResult": 2,
+                            "column": 27,
+                            "durationMicroseconds": 0,
+                            "functionName": "currentIndex",
+                            "line": 49,
+                            "message": "Cannot retrieve a non-object type by ID: navigation"
+                        },
+                        {
+                            "codegenResult": 0,
                             "column": 28,
                             "durationMicroseconds": 0,
-                            "functionName": "onClicked",
-                            "line": 55,
-                            "message": "Could not find signal \"clicked\"."
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 20,
-                            "durationMicroseconds": 1000,
-                            "functionName": "model",
-                            "line": 72,
+                            "functionName": "listModel",
+                            "line": 52,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
-                            "column": 24,
+                            "column": 29,
                             "durationMicroseconds": 0,
-                            "functionName": "width",
-                            "line": 76,
+                            "functionName": "savedModel",
+                            "line": 53,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
-                            "column": 35,
+                            "column": 29,
                             "durationMicroseconds": 0,
-                            "functionName": "fill",
-                            "line": 82,
+                            "functionName": "savedModel",
+                            "line": 57,
                             "message": ""
                         },
                         {
-                            "codegenResult": 2,
-                            "column": 34,
+                            "codegenResult": 0,
+                            "column": 28,
                             "durationMicroseconds": 0,
-                            "functionName": "checked",
-                            "line": 87,
-                            "message": "Could not find property \"checked\"."
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 36,
-                            "durationMicroseconds": 0,
-                            "functionName": "onClicked",
-                            "line": 89,
-                            "message": "Could not find signal \"clicked\"."
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 35,
-                            "durationMicroseconds": 1000,
-                            "functionName": "text",
-                            "line": 98,
-                            "message": "Cannot access value for name name"
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 45,
-                            "durationMicroseconds": 0,
-                            "functionName": "strikeout",
-                            "line": 100,
-                            "message": "Cannot access value for name bought"
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 35,
-                            "durationMicroseconds": 0,
-                            "functionName": "text",
-                            "line": 104,
-                            "message": "Cannot access value for name addedBy"
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 36,
-                            "durationMicroseconds": 0,
-                            "functionName": "onClicked",
-                            "line": 113,
-                            "message": "Could not find signal \"clicked\"."
+                            "functionName": "listModel",
+                            "line": 58,
+                            "message": ""
                         }
                     ],
                     "filePath": "C:/Users/kijja/FamilyApp/Main.qml"

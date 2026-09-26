@@ -18,6 +18,8 @@ qt_add_qml_module(appPocketHello
     VERSION 1.0
     QML_FILES
         Main.qml
+        ShoppingListPage.qml
+        SavedItemsPage.qml
 )
 
 set_target_properties(appPocketHello PROPERTIES

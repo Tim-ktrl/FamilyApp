@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/qt/qml/PocketHello/">
+  <qresource prefix="/qt/qml/FamilyApp/">
     <file alias="Main.qml">C:/Users/kijja/FamilyApp/Main.qml</file>
     <file alias="ShoppingListPage.qml">C:/Users/kijja/FamilyApp/ShoppingListPage.qml</file>
     <file alias="SavedItemsPage.qml">C:/Users/kijja/FamilyApp/SavedItemsPage.qml</file>

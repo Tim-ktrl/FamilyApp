@@ -12,5 +12,7 @@ C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Re
 --resource
 C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/appPocketHello_raw_qml_0.qrc
 C:/Users/kijja/FamilyApp/Main.qml
+C:/Users/kijja/FamilyApp/ShoppingListPage.qml
+C:/Users/kijja/FamilyApp/SavedItemsPage.qml
 --json
 C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/appPocketHello_qmllint.json
