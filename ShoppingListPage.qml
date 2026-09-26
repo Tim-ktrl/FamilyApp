@@ -2,28 +2,24 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-ApplicationWindow {
-    id: window
+Page {
+    id: root
 
-    visible: true
-    width: 390
-    height: 720
-    title: "FamilyApp"
+    property var listModel
+    property var savedModel
 
-    ListModel {
-        id: shoppingModel
+    function saveItem(itemName) {
 
-        ListElement {
-            name: "Milk"
-            addedBy: "Tim"
-            bought: false
+        // Check if item is already saved.
+        for (var i = 0; i < savedModel.count; i++) {
+            if (savedModel.get(i).name.toLowerCase() === itemName.toLowerCase()) {
+                return;
+            }
         }
 
-        ListElement {
-            name: "Eggs"
-            addedBy: "Tim"
-            bought: false
-        }
+        savedModel.append({
+            "name": itemName
+        });
     }
 
     ColumnLayout {
@@ -33,9 +29,12 @@ ApplicationWindow {
 
         Text {
             text: "Family Shopping List"
+
             font.pixelSize: 28
             font.bold: true
+
             Layout.fillWidth: true
+
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -45,17 +44,21 @@ ApplicationWindow {
 
             TextField {
                 id: itemInput
-                placeholderText: "Add item..."
+
                 Layout.fillWidth: true
+
+                placeholderText: "Add item..."
             }
 
             Button {
                 text: "Add"
 
                 onClicked: {
-                    if (itemInput.text.trim() !== "") {
-                        shoppingModel.append({
-                            "name": itemInput.text.trim(),
+                    var itemName = itemInput.text.trim();
+
+                    if (itemName !== "") {
+                        root.listModel.append({
+                            "name": itemName,
                             "addedBy": "Tim",
                             "bought": false
                         });
@@ -67,27 +70,35 @@ ApplicationWindow {
         }
 
         ListView {
+            id: shoppingList
+
             Layout.fillWidth: true
             Layout.fillHeight: true
-            model: shoppingModel
+
+            model: root.listModel
+
             spacing: 8
+            clip: true
 
             delegate: Rectangle {
-                width: ListView.view.width
-                height: 70
+
+                width: shoppingList.width
+                height: 90
+
                 radius: 10
                 border.width: 1
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 12
-                    spacing: 10
+                    anchors.margins: 10
+
+                    spacing: 8
 
                     CheckBox {
                         checked: bought
 
                         onClicked: {
-                            shoppingModel.setProperty(index, "bought", checked);
+                            root.listModel.setProperty(index, "bought", checked);
                         }
                     }
 
@@ -96,14 +107,25 @@ ApplicationWindow {
 
                         Text {
                             text: name
+
                             font.pixelSize: 18
+                            font.bold: true
                             font.strikeout: bought
                         }
 
                         Text {
                             text: "Added by " + addedBy
+
                             font.pixelSize: 12
-                            opacity: 0.7
+                            opacity: 0.6
+                        }
+                    }
+
+                    Button {
+                        text: "Save"
+
+                        onClicked: {
+                            root.saveItem(name);
                         }
                     }
 
@@ -111,7 +133,7 @@ ApplicationWindow {
                         text: "Delete"
 
                         onClicked: {
-                            shoppingModel.remove(index);
+                            root.listModel.remove(index);
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
 ApplicationWindow {
     id: window
@@ -7,48 +8,68 @@ ApplicationWindow {
     visible: true
     width: 390
     height: 720
-    title: "Family App"
+    title: "FamilyApp"
 
-    property int tapCount: 0
+    // Main shopping list data
+    ListModel {
+        id: shoppingModel
 
-    Column {
-        anchors.centerIn: parent
-        width: parent.width * 0.8
-        spacing: 16
-
-        Text {
-            width: parent.width
-            text: "My First Qt Phone App"
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 28
-            font.bold: true
-            wrapMode: Text.WordWrap
+        ListElement {
+            name: "Milk"
+            addedBy: "Tim"
+            bought: false
         }
 
-        Text {
-            width: parent.width
-            text: tapCount === 0 ? "Press the button to test the app." : "You tapped the button " + tapCount + " time" + (tapCount === 1 ? "." : "s.")
-
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 18
-            wrapMode: Text.WordWrap
+        ListElement {
+            name: "Eggs"
+            addedBy: "Tim"
+            bought: false
         }
+    }
 
-        Button {
-            width: parent.width
-            text: "Tap me"
+    // Items we want to remember for later
+    ListModel {
+        id: savedItemsModel
 
-            onClicked: {
-                tapCount += 2;
+        ListElement {
+            name: "Bread"
+        }
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        StackLayout {
+            id: pageStack
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            currentIndex: navigation.currentIndex
+
+            ShoppingListPage {
+                listModel: shoppingModel
+                savedModel: savedItemsModel
+            }
+
+            SavedItemsPage {
+                savedModel: savedItemsModel
+                listModel: shoppingModel
             }
         }
 
-        Button {
-            width: parent.width
-            text: "Reset"
+        TabBar {
+            id: navigation
 
-            onClicked: {
-                tapCount = 0;
+            Layout.fillWidth: true
+
+            TabButton {
+                text: "Shopping List"
+            }
+
+            TabButton {
+                text: "Saved Items"
             }
         }
     }

@@ -46,3 +46,16 @@
 3822	10312	8117577330255484	CMakeFiles/appPocketHello.dir/main.cpp.obj	ce476b62f13848f2
 3872	11223	8117577330752358	CMakeFiles/appPocketHello.dir/3e286ac20e30e97fa627bdce5f43363b/Debug/.rcc/qmlcache/appPocketHello_qmlcache_loader.cpp.obj	131d2a03a5cd8008
 11224	11774	8117577404267039	appPocketHello.exe	25d614d9368013fb
+151	289	8117581931964438	.qt/appPocketHello_qml.txt	d0f6b41abda3dc6
+151	289	8117581931964438	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/appPocketHello_qml.txt	d0f6b41abda3dc6
+170	1426	8117581943247666	.qt/qml_imports/appPocketHello_build.cmake	1167b1e6b062e31d
+170	1426	8117581943247666	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/qml_imports/appPocketHello_build.cmake	1167b1e6b062e31d
+1452	1572	8117581944762862	.qt/rcc/qrc_appPocketHello_raw_qml_0.cpp	8b10b6e908cd9884
+1452	1572	8117581944762862	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/qrc_appPocketHello_raw_qml_0.cpp	8b10b6e908cd9884
+1427	1853	8117581947433134	.rcc/qmlcache/appPocketHello_Main_qml.cpp	410aee07c9aa7da9
+1427	1853	8117581947433134	.rcc/qmlcache/appPocketHello_Main_qml.cpp.aotstats	410aee07c9aa7da9
+1427	1853	8117581947433134	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.rcc/qmlcache/appPocketHello_Main_qml.cpp	410aee07c9aa7da9
+1427	1853	8117581947433134	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.rcc/qmlcache/appPocketHello_Main_qml.cpp.aotstats	410aee07c9aa7da9
+1867	1993	8117581947889092	CMakeFiles/appPocketHello.dir/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.qt/rcc/qrc_appPocketHello_raw_qml_0.cpp.obj	8ab5f6fdc2172b67
+1854	6684	8117581947750298	CMakeFiles/appPocketHello.dir/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/.rcc/qmlcache/appPocketHello_Main_qml.cpp.obj	be5bec31dcf46cf1
+6685	7328	8117581996062868	appPocketHello.exe	25d614d9368013fb
