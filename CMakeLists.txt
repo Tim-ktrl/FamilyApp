@@ -20,6 +20,10 @@ qt_add_qml_module(appPocketHello
         Main.qml
         ShoppingListPage.qml
         SavedItemsPage.qml
+
+    SOURCES
+        storagemanager.h
+        storagemanager.cpp
 )
 
 set_target_properties(appPocketHello PROPERTIES
@@ -27,6 +31,7 @@ set_target_properties(appPocketHello PROPERTIES
 )
 
 target_link_libraries(appPocketHello PRIVATE
+    Qt6::Core
     Qt6::Quick
     Qt6::QuickControls2
 )

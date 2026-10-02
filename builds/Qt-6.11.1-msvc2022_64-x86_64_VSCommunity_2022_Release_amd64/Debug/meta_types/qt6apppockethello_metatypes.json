@@ -1,2 +1,64 @@
 [
+    {
+        "classes": [
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "auto"
+                    },
+                    {
+                        "name": "QML.Singleton",
+                        "value": "true"
+                    }
+                ],
+                "className": "StorageManager",
+                "lineNumber": 8,
+                "methods": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "shoppingItems",
+                                "type": "QVariantList"
+                            },
+                            {
+                                "name": "savedItems",
+                                "type": "QVariantList"
+                            }
+                        ],
+                        "index": 0,
+                        "lineNumber": 17,
+                        "name": "saveData",
+                        "returnType": "bool"
+                    },
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 21,
+                        "name": "loadData",
+                        "returnType": "QVariantMap"
+                    },
+                    {
+                        "access": "public",
+                        "index": 2,
+                        "isConst": true,
+                        "lineNumber": 23,
+                        "name": "storagePath",
+                        "returnType": "QString"
+                    }
+                ],
+                "object": true,
+                "qualifiedClassName": "StorageManager",
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "storagemanager.h",
+        "outputRevision": 69
+    }
 ]

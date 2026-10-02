@@ -8,12 +8,15 @@ Page {
     property var savedModel
     property var listModel
 
+    signal dataChanged
+
     function addToShoppingList(itemName) {
         root.listModel.append({
             "name": itemName,
             "addedBy": "Tim",
             "bought": false
         });
+        root.dataChanged();
     }
 
     ColumnLayout {
@@ -107,6 +110,8 @@ Page {
 
                         onClicked: {
                             root.savedModel.remove(index);
+
+                            root.dataChanged();
                         }
                     }
                 }

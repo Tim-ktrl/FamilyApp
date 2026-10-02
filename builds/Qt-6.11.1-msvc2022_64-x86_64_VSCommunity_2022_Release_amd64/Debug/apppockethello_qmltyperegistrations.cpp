@@ -7,6 +7,9 @@
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlmoduleregistration.h>
 
+#if __has_include(<storagemanager.h>)
+#  include <storagemanager.h>
+#endif
 
 
 #if !defined(QT_STATIC)
@@ -17,6 +20,7 @@
 Q_QMLTYPE_EXPORT void qml_register_types_PocketHello()
 {
     QT_WARNING_PUSH QT_WARNING_DISABLE_DEPRECATED
+    qmlRegisterTypesAndRevisions<StorageManager>("PocketHello", 1);
     QT_WARNING_POP
     qmlRegisterModule("PocketHello", 1, 0);
 }

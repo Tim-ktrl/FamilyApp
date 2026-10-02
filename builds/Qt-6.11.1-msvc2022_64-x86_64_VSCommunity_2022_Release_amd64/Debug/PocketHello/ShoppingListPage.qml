@@ -8,6 +8,8 @@ Page {
     property var listModel
     property var savedModel
 
+    signal dataChanged
+
     function saveItem(itemName) {
 
         // Check if item is already saved.
@@ -20,6 +22,7 @@ Page {
         savedModel.append({
             "name": itemName
         });
+        root.dataChanged();
     }
 
     ColumnLayout {
@@ -64,6 +67,8 @@ Page {
                         });
 
                         itemInput.text = "";
+
+                        root.dataChanged();
                     }
                 }
             }
@@ -99,6 +104,7 @@ Page {
 
                         onClicked: {
                             root.listModel.setProperty(index, "bought", checked);
+                            root.dataChanged();
                         }
                     }
 
@@ -134,6 +140,8 @@ Page {
 
                         onClicked: {
                             root.listModel.remove(index);
+
+                            root.dataChanged();
                         }
                     }
                 }
