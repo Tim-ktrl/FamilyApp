@@ -24,6 +24,9 @@ qt_add_qml_module(appPocketHello
     SOURCES
         storagemanager.h
         storagemanager.cpp
+
+        shoppinglistmodel.h
+        shoppinglistmodel.cpp
 )
 
 set_target_properties(appPocketHello PROPERTIES

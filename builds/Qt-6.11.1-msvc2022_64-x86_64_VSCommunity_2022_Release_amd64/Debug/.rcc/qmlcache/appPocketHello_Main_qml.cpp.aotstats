@@ -8,41 +8,41 @@
                         {
                             "codegenResult": 2,
                             "column": 5,
-                            "durationMicroseconds": 3000,
-                            "functionName": "shoppingItemsToArray",
-                            "line": 21,
-                            "message": "function without return type annotation returns QVariantList. This may prevent proper compilation to Cpp."
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 5,
                             "durationMicroseconds": 1000,
                             "functionName": "savedItemsToArray",
-                            "line": 37,
+                            "line": 29,
                             "message": "function without return type annotation returns QVariantList. This may prevent proper compilation to Cpp."
                         },
                         {
                             "codegenResult": 2,
                             "column": 5,
-                            "durationMicroseconds": 4000,
+                            "durationMicroseconds": 0,
                             "functionName": "saveData",
-                            "line": 51,
+                            "line": 43,
                             "message": "Cannot generate efficient code for calling method with argument affected by side effects"
                         },
                         {
                             "codegenResult": 2,
                             "column": 5,
-                            "durationMicroseconds": 23000,
+                            "durationMicroseconds": 2000,
                             "functionName": "loadData",
-                            "line": 59,
-                            "message": "Cannot load property length from QVariantMap::shoppingItems with type QVariant."
+                            "line": 51,
+                            "message": "Cannot load property length from QVariantMap::savedItems with type QVariant."
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 25,
+                            "durationMicroseconds": 0,
+                            "functionName": "onItemsChanged",
+                            "line": 18,
+                            "message": "Cannot retrieve a non-object type by ID: window"
                         },
                         {
                             "codegenResult": 0,
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onCompleted",
-                            "line": 90,
+                            "line": 77,
                             "message": ""
                         },
                         {
@@ -50,7 +50,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 95,
+                            "line": 82,
                             "message": ""
                         },
                         {
@@ -58,7 +58,7 @@
                             "column": 27,
                             "durationMicroseconds": 0,
                             "functionName": "currentIndex",
-                            "line": 102,
+                            "line": 89,
                             "message": "Cannot retrieve a non-object type by ID: navigation"
                         },
                         {
@@ -66,7 +66,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "listModel",
-                            "line": 105,
+                            "line": 92,
                             "message": ""
                         },
                         {
@@ -74,7 +74,7 @@
                             "column": 29,
                             "durationMicroseconds": 0,
                             "functionName": "savedModel",
-                            "line": 106,
+                            "line": 93,
                             "message": ""
                         },
                         {
@@ -82,7 +82,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "onDataChanged",
-                            "line": 108,
+                            "line": 95,
                             "message": "Cannot retrieve a non-object type by ID: window"
                         },
                         {
@@ -90,7 +90,7 @@
                             "column": 29,
                             "durationMicroseconds": 0,
                             "functionName": "savedModel",
-                            "line": 114,
+                            "line": 101,
                             "message": ""
                         },
                         {
@@ -98,7 +98,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "listModel",
-                            "line": 115,
+                            "line": 102,
                             "message": ""
                         },
                         {
@@ -106,7 +106,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "onDataChanged",
-                            "line": 117,
+                            "line": 104,
                             "message": "Cannot retrieve a non-object type by ID: window"
                         }
                     ],

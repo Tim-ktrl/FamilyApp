@@ -90,6 +90,7 @@ appPocketHello_autogen/timestamp: \
 	C:/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include/version \
 	C:/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include/yvals.h \
 	C:/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include/yvals_core.h \
+	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QAbstractListModel \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QList \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QMap \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QObject \
@@ -97,6 +98,7 @@ appPocketHello_autogen/timestamp: \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QVariant \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QVariantList \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QVariantMap \
+	C:/Qt/6.11.1/msvc2022_64/include/QtCore/QVector \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/q17memory.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/q20bit.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/q20functional.h \
@@ -106,6 +108,7 @@ appPocketHello_autogen/timestamp: \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/q20utility.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/q23type_traits.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/q23utility.h \
+	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qabstractitemmodel.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qalgorithms.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qalloc.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qanystringview.h \
@@ -227,6 +230,7 @@ appPocketHello_autogen/timestamp: \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qvariantlist.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qvariantmap.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qvarlengtharray.h \
+	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qvector.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qversionnumber.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qversiontagging.h \
 	C:/Qt/6.11.1/msvc2022_64/include/QtCore/qxptype_traits.h \
@@ -1063,6 +1067,8 @@ appPocketHello_autogen/timestamp: \
 	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/CMakeFiles/3.31.6-msvc6/CMakeRCCompiler.cmake \
 	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/CMakeFiles/3.31.6-msvc6/CMakeSystem.cmake \
 	C:/Users/kijja/FamilyApp/main.cpp \
+	C:/Users/kijja/FamilyApp/shoppinglistmodel.cpp \
+	C:/Users/kijja/FamilyApp/shoppinglistmodel.h \
 	C:/Users/kijja/FamilyApp/storagemanager.cpp \
 	C:/Users/kijja/FamilyApp/storagemanager.h \
 	C:/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe

@@ -18,7 +18,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 29,
+                            "line": 28,
                             "message": ""
                         },
                         {
@@ -26,7 +26,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalAlignment",
-                            "line": 41,
+                            "line": 40,
                             "message": ""
                         },
                         {
@@ -34,7 +34,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 59,
+                            "line": 58,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -42,7 +42,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "model",
-                            "line": 83,
+                            "line": 76,
                             "message": "Cannot retrieve a non-object type by ID: root"
                         },
                         {
@@ -50,7 +50,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 90,
+                            "line": 89,
                             "message": "Cannot access value for name shoppingList"
                         },
                         {
@@ -58,7 +58,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 97,
+                            "line": 96,
                             "message": ""
                         },
                         {
@@ -66,7 +66,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "checked",
-                            "line": 103,
+                            "line": 102,
                             "message": "Could not find property \"checked\"."
                         },
                         {
@@ -74,39 +74,39 @@
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 105,
+                            "line": 104,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
-                            "codegenResult": 2,
+                            "codegenResult": 0,
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 115,
-                            "message": "Cannot access value for name name"
+                            "line": 113,
+                            "message": ""
                         },
                         {
-                            "codegenResult": 2,
+                            "codegenResult": 0,
                             "column": 45,
                             "durationMicroseconds": 0,
                             "functionName": "strikeout",
-                            "line": 119,
-                            "message": "Cannot access value for name bought"
+                            "line": 118,
+                            "message": ""
                         },
                         {
-                            "codegenResult": 2,
+                            "codegenResult": 0,
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 123,
-                            "message": "Cannot access value for name addedBy"
+                            "line": 122,
+                            "message": ""
                         },
                         {
                             "codegenResult": 2,
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 133,
+                            "line": 132,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -114,7 +114,7 @@
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 141,
+                            "line": 140,
                             "message": "Could not find signal \"clicked\"."
                         }
                     ],

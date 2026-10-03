@@ -11,12 +11,7 @@ Page {
     signal dataChanged
 
     function addToShoppingList(itemName) {
-        root.listModel.append({
-            "name": itemName,
-            "addedBy": "Tim",
-            "bought": false
-        });
-        root.dataChanged();
+        root.listModel.addItem(itemName, "Tim");
     }
 
     ColumnLayout {

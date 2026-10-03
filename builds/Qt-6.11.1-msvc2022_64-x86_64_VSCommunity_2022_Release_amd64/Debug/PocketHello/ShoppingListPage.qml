@@ -11,8 +11,6 @@ Page {
     signal dataChanged
 
     function saveItem(itemName) {
-
-        // Check if item is already saved.
         for (var i = 0; i < savedModel.count; i++) {
             if (savedModel.get(i).name.toLowerCase() === itemName.toLowerCase()) {
                 return;
@@ -22,6 +20,7 @@ Page {
         savedModel.append({
             "name": itemName
         });
+
         root.dataChanged();
     }
 
@@ -60,15 +59,9 @@ Page {
                     var itemName = itemInput.text.trim();
 
                     if (itemName !== "") {
-                        root.listModel.append({
-                            "name": itemName,
-                            "addedBy": "Tim",
-                            "bought": false
-                        });
+                        root.listModel.addItem(itemName, "Tim");
 
                         itemInput.text = "";
-
-                        root.dataChanged();
                     }
                 }
             }
@@ -86,6 +79,12 @@ Page {
             clip: true
 
             delegate: Rectangle {
+                id: itemDelegate
+
+                required property int index
+                required property string name
+                required property string addedBy
+                required property bool bought
 
                 width: shoppingList.width
                 height: 90
@@ -100,11 +99,10 @@ Page {
                     spacing: 8
 
                     CheckBox {
-                        checked: bought
+                        checked: itemDelegate.bought
 
                         onClicked: {
-                            root.listModel.setProperty(index, "bought", checked);
-                            root.dataChanged();
+                            root.listModel.setBought(itemDelegate.index, checked);
                         }
                     }
 
@@ -112,15 +110,16 @@ Page {
                         Layout.fillWidth: true
 
                         Text {
-                            text: name
+                            text: itemDelegate.name
 
                             font.pixelSize: 18
                             font.bold: true
-                            font.strikeout: bought
+
+                            font.strikeout: itemDelegate.bought
                         }
 
                         Text {
-                            text: "Added by " + addedBy
+                            text: "Added by " + itemDelegate.addedBy
 
                             font.pixelSize: 12
                             opacity: 0.6
@@ -131,7 +130,7 @@ Page {
                         text: "Save"
 
                         onClicked: {
-                            root.saveItem(name);
+                            root.saveItem(itemDelegate.name);
                         }
                     }
 
@@ -139,9 +138,7 @@ Page {
                         text: "Delete"
 
                         onClicked: {
-                            root.listModel.remove(index);
-
-                            root.dataChanged();
+                            root.listModel.removeItem(itemDelegate.index);
                         }
                     }
                 }

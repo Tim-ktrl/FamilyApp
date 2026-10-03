@@ -5,33 +5,25 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: window
 
+    property bool loadingData: false
+
     visible: true
     width: 390
     height: 720
     title: "FamilyApp"
 
-    ListModel {
+    ShoppingListModel {
         id: shoppingModel
+
+        onItemsChanged: {
+            if (!window.loadingData) {
+                window.saveData();
+            }
+        }
     }
 
     ListModel {
         id: savedItemsModel
-    }
-
-    function shoppingItemsToArray() {
-        var items = [];
-
-        for (var i = 0; i < shoppingModel.count; i++) {
-            var item = shoppingModel.get(i);
-
-            items.push({
-                "name": item.name,
-                "addedBy": item.addedBy,
-                "bought": item.bought
-            });
-        }
-
-        return items;
     }
 
     function savedItemsToArray() {
@@ -49,7 +41,7 @@ ApplicationWindow {
     }
 
     function saveData() {
-        var success = StorageManager.saveData(shoppingItemsToArray(), savedItemsToArray());
+        var success = StorageManager.saveData(shoppingModel.toVariantList(), savedItemsToArray());
 
         if (!success) {
             console.error("Failed to save FamilyApp data");
@@ -57,32 +49,27 @@ ApplicationWindow {
     }
 
     function loadData() {
+        loadingData = true;
+
         var data = StorageManager.loadData();
 
-        shoppingModel.clear();
         savedItemsModel.clear();
 
-        if (data.shoppingItems) {
-            for (var i = 0; i < data.shoppingItems.length; i++) {
-                var item = data.shoppingItems[i];
-
-                shoppingModel.append({
-                    "name": item.name,
-                    "addedBy": item.addedBy,
-                    "bought": item.bought
-                });
-            }
-        }
-
         if (data.savedItems) {
-            for (var j = 0; j < data.savedItems.length; j++) {
-                var savedItem = data.savedItems[j];
+            for (var i = 0; i < data.savedItems.length; i++) {
+                var savedItem = data.savedItems[i];
 
                 savedItemsModel.append({
                     "name": savedItem.name
                 });
             }
         }
+
+        if (data.shoppingItems) {
+            shoppingModel.loadFromVariantList(data.shoppingItems);
+        }
+
+        loadingData = false;
 
         console.log("FamilyApp storage:", StorageManager.storagePath());
     }
