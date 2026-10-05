@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QSaveFile>
 #include <QStandardPaths>
+#include <QDebug>
 
 StorageManager::StorageManager(QObject *parent)
     : QObject(parent)
@@ -25,7 +26,11 @@ QString StorageManager::storagePath() const
     directory.mkpath(directoryPath);
   }
 
-  return directoryPath + "/familyapp_data.json";
+  QString filePath = directoryPath + "/familyapp_data.json";
+
+  qDebug() << "FamilyApp storage path:" << filePath;
+
+  return filePath;
 }
 
 bool StorageManager::saveData(

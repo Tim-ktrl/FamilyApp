@@ -22,26 +22,18 @@ ApplicationWindow {
         }
     }
 
-    ListModel {
+    SavedItemsModel {
         id: savedItemsModel
-    }
 
-    function savedItemsToArray() {
-        var items = [];
-
-        for (var i = 0; i < savedItemsModel.count; i++) {
-            var item = savedItemsModel.get(i);
-
-            items.push({
-                "name": item.name
-            });
+        onItemsChanged: {
+            if (!window.loadingData) {
+                window.saveData();
+            }
         }
-
-        return items;
     }
 
     function saveData() {
-        var success = StorageManager.saveData(shoppingModel.toVariantList(), savedItemsToArray());
+        var success = StorageManager.saveData(shoppingModel.toVariantList(), savedItemsModel.toVariantList());
 
         if (!success) {
             console.error("Failed to save FamilyApp data");
@@ -53,16 +45,8 @@ ApplicationWindow {
 
         var data = StorageManager.loadData();
 
-        savedItemsModel.clear();
-
         if (data.savedItems) {
-            for (var i = 0; i < data.savedItems.length; i++) {
-                var savedItem = data.savedItems[i];
-
-                savedItemsModel.append({
-                    "name": savedItem.name
-                });
-            }
+            savedItemsModel.loadFromVariantList(data.savedItems);
         }
 
         if (data.shoppingItems) {
@@ -91,19 +75,11 @@ ApplicationWindow {
             ShoppingListPage {
                 listModel: shoppingModel
                 savedModel: savedItemsModel
-
-                onDataChanged: {
-                    window.saveData();
-                }
             }
 
             SavedItemsPage {
                 savedModel: savedItemsModel
                 listModel: shoppingModel
-
-                onDataChanged: {
-                    window.saveData();
-                }
             }
         }
 

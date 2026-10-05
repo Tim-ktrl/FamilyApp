@@ -10,7 +10,15 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "saveItem",
-                            "line": 13,
+                            "line": 11,
+                            "message": "Functions without type annotations won't be compiled"
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 5,
+                            "durationMicroseconds": 0,
+                            "functionName": "removeItem",
+                            "line": 15,
                             "message": "Functions without type annotations won't be compiled"
                         },
                         {
@@ -18,7 +26,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 28,
+                            "line": 20,
                             "message": ""
                         },
                         {
@@ -26,7 +34,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalAlignment",
-                            "line": 40,
+                            "line": 32,
                             "message": ""
                         },
                         {
@@ -34,7 +42,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 58,
+                            "line": 50,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -42,7 +50,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "model",
-                            "line": 76,
+                            "line": 68,
                             "message": "Cannot retrieve a non-object type by ID: root"
                         },
                         {
@@ -50,7 +58,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 89,
+                            "line": 81,
                             "message": "Cannot access value for name shoppingList"
                         },
                         {
@@ -58,7 +66,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 96,
+                            "line": 88,
                             "message": ""
                         },
                         {
@@ -66,7 +74,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "checked",
-                            "line": 102,
+                            "line": 94,
                             "message": "Could not find property \"checked\"."
                         },
                         {
@@ -74,7 +82,7 @@
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 104,
+                            "line": 96,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -82,7 +90,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 113,
+                            "line": 105,
                             "message": ""
                         },
                         {
@@ -90,7 +98,7 @@
                             "column": 45,
                             "durationMicroseconds": 0,
                             "functionName": "strikeout",
-                            "line": 118,
+                            "line": 110,
                             "message": ""
                         },
                         {
@@ -98,7 +106,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 122,
+                            "line": 114,
                             "message": ""
                         },
                         {
@@ -106,7 +114,7 @@
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 132,
+                            "line": 124,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -114,7 +122,7 @@
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 140,
+                            "line": 132,
                             "message": "Could not find signal \"clicked\"."
                         }
                     ],

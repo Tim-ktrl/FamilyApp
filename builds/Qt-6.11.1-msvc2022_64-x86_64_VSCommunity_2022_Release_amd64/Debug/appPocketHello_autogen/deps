@@ -1067,6 +1067,8 @@ appPocketHello_autogen/timestamp: \
 	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/CMakeFiles/3.31.6-msvc6/CMakeRCCompiler.cmake \
 	C:/Users/kijja/FamilyApp/builds/Qt-6.11.1-msvc2022_64-x86_64_VSCommunity_2022_Release_amd64/Debug/CMakeFiles/3.31.6-msvc6/CMakeSystem.cmake \
 	C:/Users/kijja/FamilyApp/main.cpp \
+	C:/Users/kijja/FamilyApp/saveditemsmodel.cpp \
+	C:/Users/kijja/FamilyApp/saveditemsmodel.h \
 	C:/Users/kijja/FamilyApp/shoppinglistmodel.cpp \
 	C:/Users/kijja/FamilyApp/shoppinglistmodel.h \
 	C:/Users/kijja/FamilyApp/storagemanager.cpp \

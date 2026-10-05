@@ -27,6 +27,9 @@ qt_add_qml_module(appPocketHello
 
         shoppinglistmodel.h
         shoppinglistmodel.cpp
+
+        saveditemsmodel.h
+        saveditemsmodel.cpp
 )
 
 set_target_properties(appPocketHello PROPERTIES

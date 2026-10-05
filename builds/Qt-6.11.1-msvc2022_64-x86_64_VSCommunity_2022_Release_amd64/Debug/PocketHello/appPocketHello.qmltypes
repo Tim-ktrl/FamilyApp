@@ -566,6 +566,47 @@ Module {
         prototype: "QAbstractItemModel"
     }
     Component {
+        file: "saveditemsmodel.h"
+        lineNumber: 14
+        name: "SavedItemsModel"
+        accessSemantics: "reference"
+        prototype: "QAbstractListModel"
+        exports: ["PocketHello/SavedItemsModel 1.0"]
+        exportMetaObjectRevisions: [256]
+        Enum {
+            name: "Roles"
+            lineNumber: 22
+            values: ["NameRole"]
+        }
+        Property {
+            name: "count"
+            type: "int"
+            read: "count"
+            notify: "countChanged"
+            index: 0
+            lineNumber: 19
+            isReadonly: true
+        }
+        Signal { name: "itemsChanged"; lineNumber: 52 }
+        Signal { name: "countChanged"; lineNumber: 53 }
+        Method {
+            name: "addItem"
+            lineNumber: 42
+            Parameter { name: "name"; type: "QString" }
+        }
+        Method {
+            name: "removeItem"
+            lineNumber: 44
+            Parameter { name: "row"; type: "int" }
+        }
+        Method { name: "toVariantList"; type: "QVariantList"; isMethodConstant: true; lineNumber: 46 }
+        Method {
+            name: "loadFromVariantList"
+            lineNumber: 48
+            Parameter { name: "items"; type: "QVariantList" }
+        }
+    }
+    Component {
         file: "shoppinglistmodel.h"
         lineNumber: 16
         name: "ShoppingListModel"

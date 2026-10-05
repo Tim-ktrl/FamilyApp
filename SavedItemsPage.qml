@@ -8,10 +8,12 @@ Page {
     property var savedModel
     property var listModel
 
-    signal dataChanged
-
     function addToShoppingList(itemName) {
         root.listModel.addItem(itemName, "Tim");
+    }
+
+    function removeItem(itemName) {
+        root.savedModel.removeItem(itemName);
     }
 
     ColumnLayout {
@@ -104,9 +106,7 @@ Page {
                         text: "Remove"
 
                         onClicked: {
-                            root.savedModel.remove(index);
-
-                            root.dataChanged();
+                            root.removeItem(index);
                         }
                     }
                 }

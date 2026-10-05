@@ -8,20 +8,12 @@ Page {
     property var listModel
     property var savedModel
 
-    signal dataChanged
-
     function saveItem(itemName) {
-        for (var i = 0; i < savedModel.count; i++) {
-            if (savedModel.get(i).name.toLowerCase() === itemName.toLowerCase()) {
-                return;
-            }
-        }
+        root.savedModel.addItem(itemName);
+    }
 
-        savedModel.append({
-            "name": itemName
-        });
-
-        root.dataChanged();
+    function removeItem(itemName) {
+        root.listModel.removeItem(itemName);
     }
 
     ColumnLayout {
@@ -138,7 +130,7 @@ Page {
                         text: "Delete"
 
                         onClicked: {
-                            root.listModel.removeItem(itemDelegate.index);
+                            root.removeItem(index);
                         }
                     }
                 }

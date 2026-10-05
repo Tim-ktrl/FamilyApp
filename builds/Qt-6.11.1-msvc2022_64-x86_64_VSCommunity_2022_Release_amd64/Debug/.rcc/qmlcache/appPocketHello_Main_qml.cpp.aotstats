@@ -8,26 +8,18 @@
                         {
                             "codegenResult": 2,
                             "column": 5,
-                            "durationMicroseconds": 1000,
-                            "functionName": "savedItemsToArray",
-                            "line": 29,
-                            "message": "function without return type annotation returns QVariantList. This may prevent proper compilation to Cpp."
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "saveData",
-                            "line": 43,
+                            "line": 35,
                             "message": "Cannot generate efficient code for calling method with argument affected by side effects"
                         },
                         {
                             "codegenResult": 2,
                             "column": 5,
-                            "durationMicroseconds": 2000,
+                            "durationMicroseconds": 0,
                             "functionName": "loadData",
-                            "line": 51,
-                            "message": "Cannot load property length from QVariantMap::savedItems with type QVariant."
+                            "line": 43,
+                            "message": "Cannot use shadowable base type for further lookups: call to method loadData, returning QVariantMap"
                         },
                         {
                             "codegenResult": 2,
@@ -38,11 +30,19 @@
                             "message": "Cannot retrieve a non-object type by ID: window"
                         },
                         {
+                            "codegenResult": 2,
+                            "column": 25,
+                            "durationMicroseconds": 0,
+                            "functionName": "onItemsChanged",
+                            "line": 28,
+                            "message": "Cannot retrieve a non-object type by ID: window"
+                        },
+                        {
                             "codegenResult": 0,
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onCompleted",
-                            "line": 77,
+                            "line": 61,
                             "message": ""
                         },
                         {
@@ -50,7 +50,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 82,
+                            "line": 66,
                             "message": ""
                         },
                         {
@@ -58,7 +58,7 @@
                             "column": 27,
                             "durationMicroseconds": 0,
                             "functionName": "currentIndex",
-                            "line": 89,
+                            "line": 73,
                             "message": "Cannot retrieve a non-object type by ID: navigation"
                         },
                         {
@@ -66,7 +66,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "listModel",
-                            "line": 92,
+                            "line": 76,
                             "message": ""
                         },
                         {
@@ -74,23 +74,15 @@
                             "column": 29,
                             "durationMicroseconds": 0,
                             "functionName": "savedModel",
-                            "line": 93,
+                            "line": 77,
                             "message": ""
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 32,
-                            "durationMicroseconds": 0,
-                            "functionName": "onDataChanged",
-                            "line": 95,
-                            "message": "Cannot retrieve a non-object type by ID: window"
                         },
                         {
                             "codegenResult": 0,
                             "column": 29,
                             "durationMicroseconds": 0,
                             "functionName": "savedModel",
-                            "line": 101,
+                            "line": 81,
                             "message": ""
                         },
                         {
@@ -98,16 +90,8 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "listModel",
-                            "line": 102,
+                            "line": 82,
                             "message": ""
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 32,
-                            "durationMicroseconds": 0,
-                            "functionName": "onDataChanged",
-                            "line": 104,
-                            "message": "Cannot retrieve a non-object type by ID: window"
                         }
                     ],
                     "filePath": "C:/Users/kijja/FamilyApp/Main.qml"

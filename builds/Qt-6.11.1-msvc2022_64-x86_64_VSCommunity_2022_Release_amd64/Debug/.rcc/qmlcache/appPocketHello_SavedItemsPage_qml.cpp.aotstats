@@ -10,15 +10,23 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "addToShoppingList",
-                            "line": 13,
+                            "line": 11,
+                            "message": "Functions without type annotations won't be compiled"
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 5,
+                            "durationMicroseconds": 0,
+                            "functionName": "removeItem",
+                            "line": 15,
                             "message": "Functions without type annotations won't be compiled"
                         },
                         {
                             "codegenResult": 0,
                             "column": 23,
-                            "durationMicroseconds": 1000,
+                            "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 18,
+                            "line": 20,
                             "message": ""
                         },
                         {
@@ -26,7 +34,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalAlignment",
-                            "line": 30,
+                            "line": 32,
                             "message": ""
                         },
                         {
@@ -34,7 +42,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalAlignment",
-                            "line": 38,
+                            "line": 40,
                             "message": ""
                         },
                         {
@@ -42,7 +50,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "wrapMode",
-                            "line": 39,
+                            "line": 41,
                             "message": ""
                         },
                         {
@@ -50,7 +58,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "visible",
-                            "line": 47,
+                            "line": 49,
                             "message": "Cannot retrieve a non-object type by ID: root"
                         },
                         {
@@ -58,7 +66,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalAlignment",
-                            "line": 52,
+                            "line": 54,
                             "message": ""
                         },
                         {
@@ -66,7 +74,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "verticalAlignment",
-                            "line": 53,
+                            "line": 55,
                             "message": ""
                         },
                         {
@@ -74,7 +82,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "visible",
-                            "line": 65,
+                            "line": 67,
                             "message": "Cannot retrieve a non-object type by ID: root"
                         },
                         {
@@ -82,7 +90,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "model",
-                            "line": 67,
+                            "line": 69,
                             "message": "Cannot retrieve a non-object type by ID: root"
                         },
                         {
@@ -90,7 +98,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 74,
+                            "line": 76,
                             "message": "Cannot access value for name savedList"
                         },
                         {
@@ -98,7 +106,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 81,
+                            "line": 83,
                             "message": ""
                         },
                         {
@@ -106,7 +114,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 87,
+                            "line": 89,
                             "message": "Cannot access value for name name"
                         },
                         {
@@ -114,7 +122,7 @@
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 98,
+                            "line": 100,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -122,7 +130,7 @@
                             "column": 36,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 106,
+                            "line": 108,
                             "message": "Could not find signal \"clicked\"."
                         }
                     ],
