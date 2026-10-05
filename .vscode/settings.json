@@ -1,4 +1,8 @@
 {
   "cmake.options.statusBarVisibility": "visible",
-  "cmake.buildDirectory": "${workspaceFolder}\\builds\\${buildKit}\\${buildType}"
+  "cmake.buildDirectory": "${workspaceFolder}\\builds\\${buildKit}\\${buildType}",
+
+    "cmake.configureSettings": {
+        "FIREBASE_CPP_SDK_DIR": "C:/Development/firebase_cpp_sdk_13.13.0/firebase_cpp_sdk"
+    }
 }

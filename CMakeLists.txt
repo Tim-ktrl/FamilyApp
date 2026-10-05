@@ -9,6 +9,22 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
+if(NOT DEFINED FIREBASE_CPP_SDK_DIR)
+    if(DEFINED ENV{FIREBASE_CPP_SDK_DIR})
+        set(FIREBASE_CPP_SDK_DIR
+            "$ENV{FIREBASE_CPP_SDK_DIR}")
+    else()
+        message(FATAL_ERROR
+            "FIREBASE_CPP_SDK_DIR is not set")
+    endif()
+endif()
+
+add_subdirectory(
+    "${FIREBASE_CPP_SDK_DIR}"
+    firebase_cpp_sdk
+    EXCLUDE_FROM_ALL
+)
+
 qt_add_executable(appPocketHello
     main.cpp
 )
@@ -40,4 +56,18 @@ target_link_libraries(appPocketHello PRIVATE
     Qt6::Core
     Qt6::Quick
     Qt6::QuickControls2
+
+    firebase_database
+    firebase_app
 )
+
+if(WIN32)
+    target_link_libraries(appPocketHello PRIVATE
+        advapi32
+        ws2_32
+        crypt32
+        iphlpapi
+        psapi
+        userenv
+    )
+endif()

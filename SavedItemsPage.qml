@@ -12,8 +12,8 @@ Page {
         root.listModel.addItem(itemName, "Tim");
     }
 
-    function removeItem(itemName) {
-        root.savedModel.removeItem(itemName);
+    function removeItem(index) {
+        root.savedModel.removeItem(index);
     }
 
     ColumnLayout {
