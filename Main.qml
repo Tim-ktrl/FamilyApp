@@ -60,6 +60,10 @@ ApplicationWindow {
 
     Component.onCompleted: {
         loadData();
+
+        console.log("Firebase initialized:", FirebaseManager.initialized);
+
+        FirebaseManager.testWrite();
     }
 
     ColumnLayout {

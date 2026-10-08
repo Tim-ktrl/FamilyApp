@@ -19,6 +19,10 @@ if(NOT DEFINED FIREBASE_CPP_SDK_DIR)
     endif()
 endif()
 
+if(MSVC)
+    set(MSVC_RUNTIME_MODE "MD")
+endif()
+
 add_subdirectory(
     "${FIREBASE_CPP_SDK_DIR}"
     firebase_cpp_sdk
@@ -46,6 +50,9 @@ qt_add_qml_module(appPocketHello
 
         saveditemsmodel.h
         saveditemsmodel.cpp
+
+        firebasemanager.h
+        firebasemanager.cpp
 )
 
 set_target_properties(appPocketHello PROPERTIES

@@ -4,5 +4,13 @@
 
     "cmake.configureSettings": {
         "FIREBASE_CPP_SDK_DIR": "C:/Development/firebase_cpp_sdk_13.13.0/firebase_cpp_sdk"
-    }
+    },
+
+     "cmake.debugConfig": {
+        "cwd": "${workspaceFolder}",
+        "console": "internalConsole",
+        "logging": {
+            "programOutput": true
 }
+     }
+    }
