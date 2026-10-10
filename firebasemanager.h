@@ -4,6 +4,7 @@
 #include <QQmlEngine>
 #include <QVariantList>
 #include <QTimer>
+#include <QNetworkAccessManager>
 
 #include <firebase/app.h>
 #include <firebase/database.h>
@@ -11,53 +12,50 @@
 
 class FirebaseManager : public QObject
 {
-  Q_OBJECT
-  QML_ELEMENT
-  QML_SINGLETON
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
 
-  Q_PROPERTY(
-      bool initialized
-          READ initialized
-              NOTIFY initializedChanged)
+    Q_PROPERTY(
+        bool initialized
+            READ initialized
+                NOTIFY initializedChanged)
 
 public:
-  explicit FirebaseManager(
-      QObject *parent = nullptr);
+    explicit FirebaseManager(
+        QObject *parent = nullptr);
 
-  ~FirebaseManager() override;
+    ~FirebaseManager() override;
 
-  bool initialized() const;
+    bool initialized() const;
 
-  Q_INVOKABLE void testWrite();
+    Q_INVOKABLE void testWrite();
 
-  Q_INVOKABLE void saveFamilyData(
-      const QVariantList &shoppingItems,
-      const QVariantList &savedItems);
+    Q_INVOKABLE void saveFamilyData(
+        const QVariantList &shoppingItems,
+        const QVariantList &savedItems);
 
-  Q_INVOKABLE void loadFamilyData();
+    Q_INVOKABLE void loadFamilyData();
 
 signals:
-  void initializedChanged();
+    void initializedChanged();
 
-  void familyDataLoaded(
-      QVariantList shoppingItems,
-      QVariantList savedItems);
+    void familyDataLoaded(
+        QVariantList shoppingItems,
+        QVariantList savedItems);
 
-  void familyDataLoadFailed(QString message);
+    void familyDataLoadFailed(QString message);
 
 private:
-  void initializeFirebase();
+    void initializeFirebase();
 
-  firebase::App *m_app = nullptr;
+    firebase::App *m_app = nullptr;
 
-  firebase::database::Database *m_database = nullptr;
+    firebase::database::Database *m_database = nullptr;
 
-  bool m_initialized = false;
+    bool m_initialized = false;
 
-  void checkLoadResult();
+      QNetworkAccessManager m_networkManager;
 
-  firebase::Future<firebase::database::DataSnapshot>
-      m_loadFuture;
-
-  QTimer m_loadTimer;
+    bool m_downloadInProgress = false;
 };
