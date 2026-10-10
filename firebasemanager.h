@@ -2,9 +2,12 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QVariantList>
+#include <QTimer>
 
 #include <firebase/app.h>
 #include <firebase/database.h>
+#include <firebase/future.h>
 
 class FirebaseManager : public QObject
 {
@@ -27,8 +30,20 @@ public:
 
   Q_INVOKABLE void testWrite();
 
+  Q_INVOKABLE void saveFamilyData(
+      const QVariantList &shoppingItems,
+      const QVariantList &savedItems);
+
+  Q_INVOKABLE void loadFamilyData();
+
 signals:
   void initializedChanged();
+
+  void familyDataLoaded(
+      QVariantList shoppingItems,
+      QVariantList savedItems);
+
+  void familyDataLoadFailed(QString message);
 
 private:
   void initializeFirebase();
@@ -38,4 +53,11 @@ private:
   firebase::database::Database *m_database = nullptr;
 
   bool m_initialized = false;
+
+  void checkLoadResult();
+
+  firebase::Future<firebase::database::DataSnapshot>
+      m_loadFuture;
+
+  QTimer m_loadTimer;
 };
