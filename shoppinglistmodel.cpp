@@ -1,4 +1,5 @@
 #include "shoppinglistmodel.h"
+#include <QUuid>
 
 ShoppingListModel::ShoppingListModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -178,6 +179,8 @@ void ShoppingListModel::addItem(
 
   ShoppingItem item;
 
+  item.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
   item.name = cleanName;
   item.addedBy = addedBy;
   item.bought = false;
@@ -240,6 +243,7 @@ ShoppingListModel::toVariantList() const
 
     QVariantMap map;
 
+    map["id"] = item.id;
     map["name"] = item.name;
     map["addedBy"] = item.addedBy;
     map["bought"] = item.bought;
@@ -272,6 +276,12 @@ void ShoppingListModel::loadFromVariantList(
     }
 
     ShoppingItem item;
+
+    QString existingId = map.value("id").toString();
+
+    item.id = existingId.isEmpty()
+                  ? QUuid::createUuid().toString(QUuid::WithoutBraces)
+                  : existingId;
 
     item.name = name;
 

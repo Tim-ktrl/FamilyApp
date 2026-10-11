@@ -8,6 +8,7 @@
 
 struct ShoppingItem
 {
+  QString id;
   QString name;
   QString addedBy;
   bool bought = false;

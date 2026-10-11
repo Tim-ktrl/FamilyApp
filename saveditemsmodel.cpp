@@ -1,4 +1,5 @@
 #include "saveditemsmodel.h"
+#include <QUuid>
 
 SavedItemsModel::SavedItemsModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -85,6 +86,7 @@ void SavedItemsModel::addItem(
       newRow);
 
   SavedItem item;
+  item.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
   item.name = cleanName;
 
   m_items.append(item);
@@ -125,6 +127,7 @@ SavedItemsModel::toVariantList() const
   {
     QVariantMap map;
 
+    map["id"] = item.id;
     map["name"] = item.name;
 
     result.append(map);
@@ -153,6 +156,13 @@ void SavedItemsModel::loadFromVariantList(
     }
 
     SavedItem item;
+
+    QString existingId = map.value("id").toString();
+
+    item.id = existingId.isEmpty()
+                  ? QUuid::createUuid().toString(QUuid::WithoutBraces)
+                  : existingId;
+
     item.name = name;
 
     loadedItems.append(item);

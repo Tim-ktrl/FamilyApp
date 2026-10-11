@@ -45,21 +45,31 @@ ApplicationWindow {
 
         var data = StorageManager.loadData();
 
-        if (data.savedItems) {
-            savedItemsModel.loadFromVariantList(data.savedItems);
+        try {
+            if (data.savedItems) {
+                savedItemsModel.loadFromVariantList(data.savedItems);
+            }
+
+            if (data.shoppingItems) {
+                shoppingModel.loadFromVariantList(data.shoppingItems);
+            }
+        } finally {
+            loadingData = false;
         }
 
-        if (data.shoppingItems) {
-            shoppingModel.loadFromVariantList(data.shoppingItems);
+        // Save newly generated IDs back to local storage.
+        if (data.savedItems || data.shoppingItems) {
+            saveData();
         }
-
-        loadingData = false;
 
         console.log("FamilyApp storage:", StorageManager.storagePath());
     }
 
     Component.onCompleted: {
         loadData();
+
+        console.log(JSON.stringify(shoppingModel.toVariantList()));
+        console.log("Saved items:", JSON.stringify(savedItemsModel.toVariantList()));
 
         console.log("Firebase initialized:", FirebaseManager.initialized);
     }

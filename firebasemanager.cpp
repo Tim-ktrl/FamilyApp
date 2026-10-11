@@ -155,13 +155,25 @@ void FirebaseManager::saveFamilyData(
     }
 
     // Convert shopping items.
-    std::vector<firebase::Variant> shoppingData;
+    // Convert shopping items into an ID-keyed map.
+    std::map<std::string, firebase::Variant> shoppingData;
 
     for (const QVariant &value : shoppingItems)
     {
         QVariantMap item = value.toMap();
 
+        QString id = item.value("id").toString().trimmed();
+
+        if (id.isEmpty())
+        {
+            qWarning() << "Shopping item is missing an ID.";
+            return;
+        }
+
         std::map<std::string, firebase::Variant> itemData;
+
+        itemData["id"] = firebase::Variant(
+            id.toUtf8().toStdString());
 
         itemData["name"] = firebase::Variant(
             item.value("name").toString().toUtf8().toStdString());
@@ -172,22 +184,37 @@ void FirebaseManager::saveFamilyData(
         itemData["bought"] = firebase::Variant(
             item.value("bought").toBool());
 
-        shoppingData.emplace_back(itemData);
+        // Store the item using its ID as its Firebase key.
+        shoppingData[id.toUtf8().toStdString()] =
+            firebase::Variant(itemData);
     }
 
     // Convert saved items.
-    std::vector<firebase::Variant> savedData;
+    // Convert saved items into an ID-keyed map.
+    std::map<std::string, firebase::Variant> savedData;
 
     for (const QVariant &value : savedItems)
     {
         QVariantMap item = value.toMap();
 
+        QString id = item.value("id").toString().trimmed();
+
+        if (id.isEmpty())
+        {
+            qWarning() << "Saved item is missing an ID.";
+            return;
+        }
+
         std::map<std::string, firebase::Variant> itemData;
+
+        itemData["id"] = firebase::Variant(
+            id.toUtf8().toStdString());
 
         itemData["name"] = firebase::Variant(
             item.value("name").toString().toUtf8().toStdString());
 
-        savedData.emplace_back(itemData);
+        savedData[id.toUtf8().toStdString()] =
+            firebase::Variant(itemData);
     }
 
     // Combine both lists.

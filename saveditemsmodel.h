@@ -8,6 +8,7 @@
 
 struct SavedItem
 {
+  QString id;
   QString name;
 };
 
