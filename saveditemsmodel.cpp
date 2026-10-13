@@ -57,14 +57,14 @@ int SavedItemsModel::count() const
   return m_items.size();
 }
 
-void SavedItemsModel::addItem(
+QString SavedItemsModel::addItem(
     const QString &name)
 {
   QString cleanName = name.trimmed();
 
   if (cleanName.isEmpty())
   {
-    return;
+    return {};
   }
 
   // Don't allow duplicate saved items.
@@ -74,19 +74,19 @@ void SavedItemsModel::addItem(
             cleanName,
             Qt::CaseInsensitive) == 0)
     {
-      return;
+      return {};
     }
   }
 
   int newRow = m_items.size();
 
-  beginInsertRows(
-      QModelIndex(),
-      newRow,
-      newRow);
+  beginInsertRows(QModelIndex(), newRow, newRow);
 
   SavedItem item;
-  item.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+  item.id = QUuid::createUuid().toString(
+      QUuid::WithoutBraces);
+
   item.name = cleanName;
 
   m_items.append(item);
@@ -95,6 +95,8 @@ void SavedItemsModel::addItem(
 
   emit countChanged();
   emit itemsChanged();
+
+  return item.id;
 }
 
 void SavedItemsModel::removeItem(int row)

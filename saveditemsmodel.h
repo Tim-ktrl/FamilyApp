@@ -40,8 +40,7 @@ public:
 
   int count() const;
 
-  Q_INVOKABLE void addItem(const QString &name);
-
+  Q_INVOKABLE QString addItem(const QString &name);
   Q_INVOKABLE void removeItem(int row);
 
   Q_INVOKABLE QVariantList toVariantList() const;

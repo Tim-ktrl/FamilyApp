@@ -47,6 +47,9 @@ QVariant ShoppingListModel::data(
   case BoughtRole:
     return item.bought;
 
+  case ItemIdRole:
+    return item.id;
+
   default:
     return {};
   }
@@ -138,7 +141,8 @@ ShoppingListModel::roleNames() const
   return {
       {NameRole, "name"},
       {AddedByRole, "addedBy"},
-      {BoughtRole, "bought"}};
+      {BoughtRole, "bought"},
+      {ItemIdRole, "itemId"}};
 }
 
 Qt::ItemFlags ShoppingListModel::flags(
@@ -159,7 +163,7 @@ int ShoppingListModel::count() const
   return m_items.size();
 }
 
-void ShoppingListModel::addItem(
+QString ShoppingListModel::addItem(
     const QString &name,
     const QString &addedBy)
 {
@@ -167,20 +171,16 @@ void ShoppingListModel::addItem(
 
   if (cleanName.isEmpty())
   {
-    return;
+    return {};
   }
 
   int newRow = m_items.size();
 
-  beginInsertRows(
-      QModelIndex(),
-      newRow,
-      newRow);
+  beginInsertRows(QModelIndex(), newRow, newRow);
 
   ShoppingItem item;
 
   item.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
-
   item.name = cleanName;
   item.addedBy = addedBy;
   item.bought = false;
@@ -191,6 +191,8 @@ void ShoppingListModel::addItem(
 
   emit countChanged();
   emit itemsChanged();
+
+  return item.id;
 }
 
 void ShoppingListModel::removeItem(int row)

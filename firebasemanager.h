@@ -37,6 +37,22 @@ public:
 
     Q_INVOKABLE void loadFamilyData();
 
+    Q_INVOKABLE void updateShoppingItemBought(
+        const QString &itemId,
+        bool bought);
+
+    Q_INVOKABLE void addShoppingItem(
+        const QString &itemId,
+        const QString &name,
+        const QString &addedBy);
+
+    Q_INVOKABLE void deleteShoppingItem(
+        const QString &itemId);
+
+    Q_INVOKABLE void addSavedItem(
+        const QString &itemId,
+        const QString &name);
+
 signals:
     void initializedChanged();
 
@@ -55,7 +71,7 @@ private:
 
     bool m_initialized = false;
 
-      QNetworkAccessManager m_networkManager;
+    QNetworkAccessManager m_networkManager;
 
     bool m_downloadInProgress = false;
 };

@@ -26,7 +26,8 @@ public:
   {
     NameRole = Qt::UserRole + 1,
     AddedByRole,
-    BoughtRole
+    BoughtRole,
+    ItemIdRole
   };
 
   Q_ENUM(Roles)
@@ -52,7 +53,7 @@ public:
 
   int count() const;
 
-  Q_INVOKABLE void addItem(
+  Q_INVOKABLE QString addItem(
       const QString &name,
       const QString &addedBy);
 

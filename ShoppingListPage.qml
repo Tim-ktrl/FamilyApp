@@ -9,11 +9,39 @@ Page {
     property var savedModel
 
     function saveItem(itemName) {
-        root.savedModel.addItem(itemName);
+
+        // Create the saved item locally.
+        var newId = root.savedModel.addItem(itemName);
+
+        // An empty ID means nothing was added.
+        if (!newId) {
+            console.log("Item already saved or invalid.");
+            return;
+        }
+
+        // Create the same item in Firebase.
+        if (FirebaseManager.initialized) {
+            FirebaseManager.addSavedItem(newId, itemName);
+        } else {
+            console.warn("Firebase unavailable. Item saved locally only.");
+        }
     }
 
-    function removeItem(index) {
+    function removeItem(index, itemId) {
+        if (!itemId) {
+            console.error("Cannot delete item without an ID.");
+            return;
+        }
+
+        // Delete from the local shopping list.
         root.listModel.removeItem(index);
+
+        // Delete the same item from Firebase.
+        if (FirebaseManager.initialized) {
+            FirebaseManager.deleteShoppingItem(itemId);
+        } else {
+            console.warn("Firebase unavailable; item deleted locally only.");
+        }
     }
 
     ColumnLayout {
@@ -51,9 +79,19 @@ Page {
                     var itemName = itemInput.text.trim();
 
                     if (itemName !== "") {
-                        root.listModel.addItem(itemName, "Tim");
 
-                        itemInput.text = "";
+                        // Add locally and retrieve the generated ID.
+                        var newId = root.listModel.addItem(itemName, "Tim");
+
+                        if (newId !== "") {
+
+                            // Add the same item to Firebase.
+                            if (FirebaseManager.initialized) {
+                                FirebaseManager.addShoppingItem(newId, itemName, "Tim");
+                            }
+
+                            itemInput.text = "";
+                        }
                     }
                 }
             }
@@ -77,6 +115,7 @@ Page {
                 required property string name
                 required property string addedBy
                 required property bool bought
+                required property string itemId
 
                 width: shoppingList.width
                 height: 90
@@ -95,6 +134,10 @@ Page {
 
                         onClicked: {
                             root.listModel.setBought(itemDelegate.index, checked);
+
+                            if (FirebaseManager.initialized) {
+                                FirebaseManager.updateShoppingItemBought(itemDelegate.itemId, checked);
+                            }
                         }
                     }
 
@@ -130,7 +173,7 @@ Page {
                         text: "Delete"
 
                         onClicked: {
-                            root.removeItem(index);
+                            root.removeItem(itemDelegate.index, itemDelegate.itemId);
                         }
                     }
                 }

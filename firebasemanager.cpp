@@ -347,3 +347,211 @@ void FirebaseManager::loadFamilyData()
                 emit familyDataLoaded(shoppingItems, savedItems);
             });
 }
+
+void FirebaseManager::updateShoppingItemBought(
+    const QString &itemId,
+    bool bought)
+{
+    if (!m_initialized || m_database == nullptr)
+    {
+        qWarning() << "Firebase is not initialized.";
+        return;
+    }
+
+    if (itemId.isEmpty())
+    {
+        qWarning() << "Cannot update item without ID.";
+        return;
+    }
+
+    std::string id = itemId.toUtf8().toStdString();
+
+    firebase::database::DatabaseReference reference =
+        m_database->GetReference()
+            .Child("familyData")
+            .Child("shoppingItems")
+            .Child(id.c_str())
+            .Child("bought");
+
+    firebase::Future<void> future =
+        reference.SetValue(firebase::Variant(bought));
+
+    future.OnCompletion(
+        [](const firebase::Future<void> &result)
+        {
+            if (result.error() == 0)
+            {
+                qDebug()
+                    << "Shopping item bought status updated!";
+            }
+            else
+            {
+                qWarning()
+                    << "Failed to update item:"
+                    << result.error_message();
+            }
+        });
+}
+
+void FirebaseManager::addShoppingItem(
+    const QString &itemId,
+    const QString &name,
+    const QString &addedBy)
+{
+    if (!m_initialized || m_database == nullptr)
+    {
+        qWarning() << "Firebase is not initialized.";
+        return;
+    }
+
+    if (itemId.isEmpty() || name.trimmed().isEmpty())
+    {
+        qWarning() << "Invalid shopping item.";
+        return;
+    }
+
+    // Convert the item into Firebase data.
+    std::map<std::string, firebase::Variant> itemData;
+
+    itemData["id"] = firebase::Variant(
+        itemId.toUtf8().toStdString());
+
+    itemData["name"] = firebase::Variant(
+        name.toUtf8().toStdString());
+
+    itemData["addedBy"] = firebase::Variant(
+        addedBy.toUtf8().toStdString());
+
+    itemData["bought"] = firebase::Variant(false);
+
+    // Find this specific item's location.
+    std::string id = itemId.toUtf8().toStdString();
+
+    firebase::database::DatabaseReference reference =
+        m_database->GetReference()
+            .Child("familyData")
+            .Child("shoppingItems")
+            .Child(id.c_str());
+
+    // Upload only the new item.
+    firebase::Future<void> future =
+        reference.SetValue(firebase::Variant(itemData));
+
+    future.OnCompletion(
+        [](const firebase::Future<void> &result)
+        {
+            if (result.error() == 0)
+            {
+                qDebug() << "Shopping item added to Firebase!";
+            }
+            else
+            {
+                qWarning()
+                    << "Failed to add shopping item:"
+                    << result.error_message();
+            }
+        });
+}
+
+void FirebaseManager::deleteShoppingItem(
+    const QString &itemId)
+{
+    if (!m_initialized || m_database == nullptr)
+    {
+        qWarning() << "Firebase is not initialized.";
+        return;
+    }
+
+    if (itemId.isEmpty())
+    {
+        qWarning() << "Cannot delete item without an ID.";
+        return;
+    }
+
+    // Convert QString to std::string.
+    std::string id = itemId.toUtf8().toStdString();
+
+    // Find this specific item in Firebase.
+    firebase::database::DatabaseReference reference =
+        m_database->GetReference()
+            .Child("familyData")
+            .Child("shoppingItems")
+            .Child(id.c_str());
+
+    // Delete only this item.
+    firebase::Future<void> future =
+        reference.RemoveValue();
+
+    future.OnCompletion(
+        [](const firebase::Future<void> &result)
+        {
+            if (result.error() == 0)
+            {
+                qDebug()
+                    << "Shopping item deleted from Firebase!";
+            }
+            else
+            {
+                qWarning()
+                    << "Failed to delete shopping item:"
+                    << result.error_message();
+            }
+        });
+}
+
+void FirebaseManager::addSavedItem(
+    const QString &itemId,
+    const QString &name)
+{
+    if (!m_initialized || m_database == nullptr)
+    {
+        qWarning() << "Firebase is not initialized.";
+        return;
+    }
+
+    QString cleanName = name.trimmed();
+
+    if (itemId.isEmpty() || cleanName.isEmpty())
+    {
+        qWarning() << "Invalid saved item.";
+        return;
+    }
+
+    // Construct the saved item's data.
+    std::map<std::string, firebase::Variant> itemData;
+
+    itemData["id"] = firebase::Variant(
+        itemId.toUtf8().toStdString());
+
+    itemData["name"] = firebase::Variant(
+        cleanName.toUtf8().toStdString());
+
+    // Navigate to this saved item's unique location.
+    std::string id = itemId.toUtf8().toStdString();
+
+    firebase::database::DatabaseReference reference =
+        m_database->GetReference()
+            .Child("familyData")
+            .Child("savedItems")
+            .Child(id.c_str());
+
+    // Write only this saved item.
+    firebase::Future<void> future =
+        reference.SetValue(firebase::Variant(itemData));
+
+    future.OnCompletion(
+        [](const firebase::Future<void> &result)
+        {
+            if (result.error() == 0)
+            {
+                qDebug()
+                    << "Saved item added to Firebase!";
+            }
+            else
+            {
+                qWarning()
+                    << "Failed to add saved item:"
+                    << result.error_message();
+            }
+        });
+}
