@@ -53,6 +53,9 @@ public:
         const QString &itemId,
         const QString &name);
 
+    Q_INVOKABLE void deleteSavedItem(
+        const QString &itemId);
+
 signals:
     void initializedChanged();
 

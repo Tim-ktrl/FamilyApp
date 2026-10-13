@@ -555,3 +555,46 @@ void FirebaseManager::addSavedItem(
             }
         });
 }
+
+void FirebaseManager::deleteSavedItem(
+    const QString &itemId)
+{
+    if (!m_initialized || m_database == nullptr)
+    {
+        qWarning() << "Firebase is not initialized.";
+        return;
+    }
+
+    if (itemId.isEmpty())
+    {
+        qWarning() << "Cannot delete saved item without an ID.";
+        return;
+    }
+
+    std::string id = itemId.toUtf8().toStdString();
+
+    firebase::database::DatabaseReference reference =
+        m_database->GetReference()
+            .Child("familyData")
+            .Child("savedItems")
+            .Child(id.c_str());
+
+    firebase::Future<void> future =
+        reference.RemoveValue();
+
+    future.OnCompletion(
+        [](const firebase::Future<void> &result)
+        {
+            if (result.error() == 0)
+            {
+                qDebug()
+                    << "Saved item deleted from Firebase!";
+            }
+            else
+            {
+                qWarning()
+                    << "Failed to delete saved item:"
+                    << result.error_message();
+            }
+        });
+}

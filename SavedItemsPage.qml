@@ -9,11 +9,35 @@ Page {
     property var listModel
 
     function addToShoppingList(itemName) {
-        root.listModel.addItem(itemName, "Tim");
+        // Create a new shopping item.
+        var newId = root.listModel.addItem(itemName, "Tim");
+
+        if (!newId) {
+            console.warn("Could not add item to shopping list.");
+            return;
+        }
+
+        // Create the new shopping item in Firebase.
+        if (FirebaseManager.initialized) {
+            FirebaseManager.addShoppingItem(newId, itemName, "Tim");
+        } else {
+            console.warn("Firebase unavailable; added locally only.");
+        }
     }
 
-    function removeItem(index) {
+    function removeItem(index, itemId) {
+        if (!itemId) {
+            console.error("Cannot delete saved item without an ID.");
+            return;
+        }
+
         root.savedModel.removeItem(index);
+
+        if (FirebaseManager.initialized) {
+            FirebaseManager.deleteSavedItem(itemId);
+        } else {
+            console.warn("Firebase unavailable; removed locally only.");
+        }
     }
 
     ColumnLayout {
@@ -72,12 +96,17 @@ Page {
             clip: true
 
             delegate: Rectangle {
+                id: savedDelegate
 
                 width: savedList.width
                 height: 75
 
                 radius: 10
                 border.width: 1
+
+                required property int index
+                required property string name
+                required property string itemId
 
                 RowLayout {
                     anchors.fill: parent
@@ -106,7 +135,7 @@ Page {
                         text: "Remove"
 
                         onClicked: {
-                            root.removeItem(index);
+                            root.removeItem(savedDelegate.index, savedDelegate.itemId);
                         }
                     }
                 }

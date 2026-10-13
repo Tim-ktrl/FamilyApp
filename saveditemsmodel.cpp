@@ -40,6 +40,9 @@ QVariant SavedItemsModel::data(
   case NameRole:
     return item.name;
 
+  case ItemIdRole:
+    return item.id;
+
   default:
     return {};
   }
@@ -49,7 +52,8 @@ QHash<int, QByteArray>
 SavedItemsModel::roleNames() const
 {
   return {
-      {NameRole, "name"}};
+      {NameRole, "name"},
+      {ItemIdRole, "itemId"}};
 }
 
 int SavedItemsModel::count() const

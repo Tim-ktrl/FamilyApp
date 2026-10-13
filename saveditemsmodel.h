@@ -22,9 +22,9 @@ class SavedItemsModel : public QAbstractListModel
 public:
   enum Roles
   {
-    NameRole = Qt::UserRole + 1
+    NameRole = Qt::UserRole + 1,
+    ItemIdRole
   };
-
   Q_ENUM(Roles)
 
   explicit SavedItemsModel(QObject *parent = nullptr);
