@@ -18,6 +18,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTimer>
 
 FirebaseManager::FirebaseManager(QObject *parent)
     : QObject(parent)
@@ -28,6 +29,8 @@ FirebaseManager::FirebaseManager(QObject *parent)
 
 FirebaseManager::~FirebaseManager()
 {
+
+    stopRealtimeListening();
 
     if (m_database != nullptr)
     {
@@ -261,7 +264,11 @@ void FirebaseManager::loadFamilyData()
 
     if (m_downloadInProgress)
     {
-        qDebug() << "Download already in progress.";
+        m_downloadAgain = true;
+
+        qDebug()
+            << "Download in progress. Another refresh queued.";
+
         return;
     }
 
@@ -282,6 +289,14 @@ void FirebaseManager::loadFamilyData()
             [this, reply]()
             {
                 m_downloadInProgress = false;
+
+                if (m_downloadAgain)
+                {
+                    m_downloadAgain = false;
+
+                    QTimer::singleShot(0, this, [this]()
+                                       { loadFamilyData(); });
+                }
 
                 QByteArray response = reply->readAll();
                 auto networkError = reply->error();
@@ -597,4 +612,205 @@ void FirebaseManager::deleteSavedItem(
                     << result.error_message();
             }
         });
+}
+
+void FirebaseManager::startRealtimeListening()
+{
+    if (!m_initialized || m_database == nullptr)
+    {
+        qWarning() << "Firebase is not initialized.";
+        return;
+    }
+
+    if (m_streamReply != nullptr)
+    {
+        qDebug() << "Realtime listener already running.";
+        return;
+    }
+
+    m_streamBuffer.clear();
+    m_currentEventType.clear();
+    m_currentEventData.clear();
+
+    m_waitingForInitialSnapshot = true;
+
+    // Get the Firebase location to monitor.
+    auto reference =
+        m_database->GetReference().Child("familyData");
+
+    QString url =
+        QString::fromStdString(reference.url()) + ".json";
+
+    QNetworkRequest request{QUrl(url)};
+
+    // Tell Firebase we want a continuous event stream.
+    request.setRawHeader("Accept", "text/event-stream");
+
+    // Allow HTTPS redirects used by Firebase.
+    request.setAttribute(
+        QNetworkRequest::RedirectPolicyAttribute,
+        QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    // Open the connection.
+    QNetworkReply *reply = m_networkManager.get(request);
+
+    m_streamReply = reply;
+
+    qDebug() << "Realtime listener started.";
+
+    // Called whenever new data arrives.
+    connect(
+        reply,
+        &QIODevice::readyRead,
+        this,
+        [this, reply]()
+        {
+            if (reply != m_streamReply)
+                return;
+
+            processRealtimeData(reply->readAll());
+        });
+
+    // Called if the connection closes.
+    connect(
+        reply,
+        &QNetworkReply::finished,
+        this,
+        [this, reply]()
+        {
+            bool wasActive = (m_streamReply == reply);
+
+            if (wasActive)
+            {
+                m_streamReply = nullptr;
+
+                if (reply->error() != QNetworkReply::NoError)
+                {
+                    qWarning()
+                        << "Realtime connection error:"
+                        << reply->errorString();
+                }
+                else
+                {
+                    qDebug() << "Realtime connection closed.";
+                }
+            }
+
+            reply->deleteLater();
+        });
+}
+
+void FirebaseManager::stopRealtimeListening()
+{
+    if (m_streamReply == nullptr)
+    {
+        return;
+    }
+
+    QNetworkReply *reply = m_streamReply;
+
+    m_streamReply = nullptr;
+
+    reply->abort();
+
+    qDebug() << "Realtime listener stopped.";
+}
+
+void FirebaseManager::processRealtimeData(
+    const QByteArray &bytes)
+{
+    // Keep incoming bytes until we have complete lines.
+    m_streamBuffer.append(bytes);
+
+    while (true)
+    {
+        qsizetype newlinePos = m_streamBuffer.indexOf('\n');
+
+        if (newlinePos < 0)
+            break;
+
+        QByteArray line = m_streamBuffer.left(newlinePos);
+        m_streamBuffer.remove(0, newlinePos + 1);
+
+        // Handle Windows-style line endings.
+        if (line.endsWith('\r'))
+            line.chop(1);
+
+        // A blank line marks the end of an SSE event.
+        if (line.isEmpty())
+        {
+            QByteArray eventType = m_currentEventType;
+            QByteArray eventData = m_currentEventData;
+
+            m_currentEventType.clear();
+            m_currentEventData.clear();
+
+            if (eventType == "put" || eventType == "patch")
+            {
+                QJsonParseError error;
+
+                QJsonDocument document =
+                    QJsonDocument::fromJson(eventData, &error);
+
+                if (error.error != QJsonParseError::NoError ||
+                    !document.isObject())
+                {
+                    qWarning() << "Invalid realtime event JSON.";
+                    continue;
+                }
+
+                QJsonObject payload = document.object();
+
+                QString path =
+                    payload.value("path").toString();
+
+                if (path.isEmpty())
+                    continue;
+
+                // Skip the initial full snapshot for this test.
+                if (m_waitingForInitialSnapshot &&
+                    eventType == "put" &&
+                    path == "/")
+                {
+                    m_waitingForInitialSnapshot = false;
+
+                    qDebug() << "Initial Firebase snapshot received.";
+                    continue;
+                }
+
+                qDebug() << "Firebase changed at:" << path;
+
+                emit remoteDataChanged(path);
+            }
+            else if (eventType == "cancel" ||
+                     eventType == "auth_revoked")
+            {
+                qWarning()
+                    << "Firebase stream stopped:"
+                    << eventType
+                    << eventData;
+
+                stopRealtimeListening();
+                return;
+            }
+
+            // Ignore keep-alive events.
+            continue;
+        }
+
+        if (line.startsWith(':'))
+            continue;
+
+        if (line.startsWith("event:"))
+        {
+            m_currentEventType = line.mid(6).trimmed();
+        }
+        else if (line.startsWith("data:"))
+        {
+            if (!m_currentEventData.isEmpty())
+                m_currentEventData.append('\n');
+
+            m_currentEventData.append(line.mid(5).trimmed());
+        }
+    }
 }

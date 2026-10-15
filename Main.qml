@@ -77,6 +77,12 @@ ApplicationWindow {
     Connections {
         target: FirebaseManager
 
+        function onRemoteDataChanged(path) {
+            console.log("Realtime update detected:", path);
+
+            FirebaseManager.loadFamilyData();
+        }
+
         function onFamilyDataLoaded(shoppingItems, savedItems) {
             console.log("QML RECEIVED FIREBASE DATA!");
 
@@ -112,6 +118,19 @@ ApplicationWindow {
         }
     }
 
+    Timer {
+        interval: 5000
+        repeat: true
+        triggeredOnStart: true
+
+        running: autoRefreshButton.checked && FirebaseManager.initialized
+
+        onTriggered: {
+            console.log("Checking Firebase for updates...");
+            FirebaseManager.loadFamilyData();
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -134,6 +153,19 @@ ApplicationWindow {
         }
 
         Button {
+            id: autoRefreshButton
+
+            text: checked ? "Stop Auto Refresh (Test)" : "Start Auto Refresh (Test)"
+
+            checkable: true
+            checked: false
+
+            Layout.fillWidth: true
+
+            enabled: FirebaseManager.initialized
+        }
+
+        Button {
             text: "Upload to Firebase (Test)"
 
             Layout.fillWidth: true
@@ -153,6 +185,26 @@ ApplicationWindow {
 
             onClicked: {
                 FirebaseManager.loadFamilyData();
+            }
+        }
+
+        Button {
+            id: realtimeButton
+
+            text: checked ? "Stop Realtime (Test)" : "Start Realtime (Test)"
+
+            checkable: true
+
+            Layout.fillWidth: true
+
+            enabled: FirebaseManager.initialized
+
+            onClicked: {
+                if (checked) {
+                    FirebaseManager.startRealtimeListening();
+                } else {
+                    FirebaseManager.stopRealtimeListening();
+                }
             }
         }
 

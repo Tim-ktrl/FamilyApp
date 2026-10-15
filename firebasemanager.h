@@ -5,10 +5,12 @@
 #include <QVariantList>
 #include <QTimer>
 #include <QNetworkAccessManager>
+#include <QByteArray>
 
 #include <firebase/app.h>
 #include <firebase/database.h>
 #include <firebase/future.h>
+#include <QNetworkReply>
 
 class FirebaseManager : public QObject
 {
@@ -56,6 +58,10 @@ public:
     Q_INVOKABLE void deleteSavedItem(
         const QString &itemId);
 
+    Q_INVOKABLE void startRealtimeListening();
+
+    Q_INVOKABLE void stopRealtimeListening();
+
 signals:
     void initializedChanged();
 
@@ -64,6 +70,8 @@ signals:
         QVariantList savedItems);
 
     void familyDataLoadFailed(QString message);
+
+    void remoteDataChanged(QString path);
 
 private:
     void initializeFirebase();
@@ -77,4 +85,16 @@ private:
     QNetworkAccessManager m_networkManager;
 
     bool m_downloadInProgress = false;
+
+    QNetworkReply *m_streamReply = nullptr;
+
+    void processRealtimeData(const QByteArray &bytes);
+
+    QByteArray m_streamBuffer;
+    QByteArray m_currentEventType;
+    QByteArray m_currentEventData;
+
+    bool m_waitingForInitialSnapshot = true;
+
+    bool m_downloadAgain = false;
 };
