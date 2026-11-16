@@ -63,10 +63,12 @@ void ItemSyncCoordinator::incoming(const QString &collection, const QString &id,
         return;
     const Key key{collection, id};
     auto it = m_items.find(key);
-    if (it == m_items.end()) {
+    if (it == m_items.end() && !m_verifyRemote) {
         emit itemReady(collection, id, item, removed);
         return;
     }
+    if (it == m_items.end())
+        it = m_items.insert(key, ItemState{});
     it->dirty = true;
     if (!it->queue.isEmpty() || it->phase == Failed || it->phase == ReconciliationFailed)
         return;
@@ -175,4 +177,35 @@ int ItemSyncCoordinator::failedCount() const
 ItemSyncCoordinator::ItemState ItemSyncCoordinator::state(const QString &collection, const QString &id) const
 {
     return m_items.value({collection, id});
+}
+
+int ItemSyncCoordinator::unresolvedLocalCount() const
+{
+    int count = 0;
+    for (const auto &entry : m_items)
+        if (entry.latestGeneration && entry.phase != Synchronized)
+            ++count;
+    return count;
+}
+
+void ItemSyncCoordinator::clearRemoteReads()
+{
+    for (auto it = m_items.begin(); it != m_items.end();) {
+        if (!it->latestGeneration) it = m_items.erase(it);
+        else ++it;
+    }
+    emit stateChanged();
+}
+
+void ItemSyncCoordinator::revalidateAcknowledged()
+{
+    // An explicit online startup/reconnect may re-read an acknowledged item.
+    // Failed writes and their queued operations are never retried or discarded.
+    const auto keys = m_items.keys();
+    for (const auto &key : keys) {
+        const auto &entry = m_items[key];
+        if (entry.acknowledgedGeneration && entry.queue.isEmpty()
+            && entry.phase == ReconciliationFailed)
+            requestRead(key);
+    }
 }

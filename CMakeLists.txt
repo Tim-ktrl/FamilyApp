@@ -60,6 +60,10 @@ qt_add_qml_module(appPocketHello
         itemsynccoordinator.h
         itemsynccoordinator.cpp
         qtcallbackgate.h
+        familydatavalidation.h
+        familydatavalidation.cpp
+        initialsynccoordinator.h
+        initialsynccoordinator.cpp
 )
 
 set_target_properties(appPocketHello PROPERTIES

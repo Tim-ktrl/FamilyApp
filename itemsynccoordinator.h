@@ -43,6 +43,10 @@ public:
     bool bulkBusy() const { return m_bulkBusy; }
     int unresolvedCount() const;
     int failedCount() const;
+    int unresolvedLocalCount() const;
+    void verifyRemoteEvents(bool enabled) { m_verifyRemote = enabled; }
+    void clearRemoteReads();
+    void revalidateAcknowledged();
     quint64 mutationGeneration() const { return m_generation; }
     ItemState state(const QString &collection, const QString &id) const;
 
@@ -63,4 +67,5 @@ private:
     quint64 m_session = 0;
     bool m_listening = false;
     bool m_bulkBusy = false;
+    bool m_verifyRemote = false;
 };

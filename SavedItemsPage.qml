@@ -9,6 +9,7 @@ Page {
     property var listModel
 
     function addToShoppingList(itemName) {
+        if (!FirebaseManager.editingEnabled) return;
         // Create a new shopping item.
         var newId = root.listModel.addItem(itemName, "Tim");
 
@@ -26,6 +27,7 @@ Page {
     }
 
     function removeItem(index, itemId) {
+        if (!FirebaseManager.editingEnabled) return;
         if (!itemId) {
             console.error("Cannot delete saved item without an ID.");
             return;

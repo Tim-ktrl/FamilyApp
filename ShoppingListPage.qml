@@ -9,6 +9,7 @@ Page {
     property var savedModel
 
     function saveItem(itemName) {
+        if (!FirebaseManager.editingEnabled) return;
 
         // Create the saved item locally.
         var newId = root.savedModel.addItem(itemName);
@@ -28,6 +29,7 @@ Page {
     }
 
     function removeItem(index, itemId) {
+        if (!FirebaseManager.editingEnabled) return;
         if (!itemId) {
             console.error("Cannot delete item without an ID.");
             return;
@@ -76,6 +78,7 @@ Page {
                 text: "Add"
 
                 onClicked: {
+                    if (!FirebaseManager.editingEnabled) return;
                     var itemName = itemInput.text.trim();
 
                     if (itemName !== "") {
@@ -133,6 +136,7 @@ Page {
                         checked: itemDelegate.bought
 
                         onClicked: {
+                            if (!FirebaseManager.editingEnabled) return;
                             root.listModel.setBought(itemDelegate.index, checked);
 
                             if (FirebaseManager.initialized) {
