@@ -142,6 +142,39 @@ SavedItemsModel::toVariantList() const
   return result;
 }
 
+int SavedItemsModel::findItemById(const QString &itemId) const
+{
+  for (int row = 0; row < m_items.size(); ++row)
+    if (m_items.at(row).id == itemId)
+      return row;
+  return -1;
+}
+
+void SavedItemsModel::upsertRemoteItem(const QString &itemId, const QString &name)
+{
+  const QString cleanName = name.trimmed();
+  if (itemId.isEmpty() || cleanName.isEmpty())
+    return;
+  const int row = findItemById(itemId);
+  if (row < 0) {
+    const int newRow = m_items.size();
+    beginInsertRows(QModelIndex(), newRow, newRow);
+    m_items.append({itemId, cleanName});
+    endInsertRows();
+    emit countChanged();
+    emit itemsChanged();
+  } else if (m_items.at(row).name != cleanName) {
+    m_items[row].name = cleanName;
+    emit dataChanged(index(row, 0), index(row, 0), {NameRole});
+    emit itemsChanged();
+  }
+}
+
+void SavedItemsModel::removeItemById(const QString &itemId)
+{
+  removeItem(findItemById(itemId));
+}
+
 void SavedItemsModel::loadFromVariantList(
     const QVariantList &items)
 {

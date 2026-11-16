@@ -59,6 +59,11 @@ public:
 
   Q_INVOKABLE void removeItem(int row);
 
+  Q_INVOKABLE int findItemById(const QString &itemId) const;
+  Q_INVOKABLE void upsertRemoteItem(const QString &itemId, const QString &name,
+                                  const QString &addedBy, bool bought);
+  Q_INVOKABLE void removeItemById(const QString &itemId);
+
   Q_INVOKABLE void setBought(
       int row,
       bool bought);

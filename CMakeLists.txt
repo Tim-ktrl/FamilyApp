@@ -57,6 +57,9 @@ qt_add_qml_module(appPocketHello
 
         firebasemanager.h
         firebasemanager.cpp
+        itemsynccoordinator.h
+        itemsynccoordinator.cpp
+        qtcallbackgate.h
 )
 
 set_target_properties(appPocketHello PROPERTIES

@@ -6,6 +6,8 @@ ApplicationWindow {
     id: window
 
     property bool loadingData: false
+    property bool applyingRemoteChange: false
+    property string syncError: ""
 
     visible: true
     width: 390
@@ -33,10 +35,24 @@ ApplicationWindow {
     }
 
     function saveData() {
+        // Both local and remote model changes update JSON only. Firebase writes
+        // remain in the pages' user-action handlers, never in itemsChanged.
         var success = StorageManager.saveData(shoppingModel.toVariantList(), savedItemsModel.toVariantList());
+
+        if (applyingRemoteChange)
+            console.log("Remote item change persisted to local cache:", success);
 
         if (!success) {
             console.error("Failed to save FamilyApp data");
+        }
+    }
+
+    function applyRemoteChange(action) {
+        applyingRemoteChange = true;
+        try {
+            action();
+        } finally {
+            applyingRemoteChange = false;
         }
     }
 
@@ -77,6 +93,42 @@ ApplicationWindow {
     Connections {
         target: FirebaseManager
 
+        function onShoppingItemReceived(item) {
+            window.applyRemoteChange(function () {
+                shoppingModel.upsertRemoteItem(item.id, item.name, item.addedBy, item.bought);
+            });
+        }
+
+        function onShoppingItemRemoved(itemId) {
+            window.applyRemoteChange(function () { shoppingModel.removeItemById(itemId); });
+        }
+
+        function onSavedItemReceived(item) {
+            window.applyRemoteChange(function () { savedItemsModel.upsertRemoteItem(item.id, item.name); });
+        }
+
+        function onSavedItemRemoved(itemId) {
+            window.applyRemoteChange(function () { savedItemsModel.removeItemById(itemId); });
+        }
+
+        function onChildListeningChanged() {
+            childListenerButton.checked = FirebaseManager.childListening;
+        }
+
+        function onChildListeningFailed(collection, message) {
+            console.error("Child Listener Test stopped:", collection, message);
+        }
+
+        function onItemSyncFailed(collection, itemId, message) {
+            window.syncError = collection + "/" + itemId + ": " + message;
+            console.error("Item synchronization paused:", window.syncError);
+        }
+
+        function onSyncStateChanged() {
+            if (FirebaseManager.failedItemCount === 0)
+                window.syncError = "";
+        }
+
         function onRemoteDataChanged(path) {
             console.log("Realtime update detected:", path);
 
@@ -84,6 +136,8 @@ ApplicationWindow {
         }
 
         function onFamilyDataLoaded(shoppingItems, savedItems) {
+            if (FirebaseManager.childListening || FirebaseManager.unresolvedItemCount > 0 || FirebaseManager.bulkWriteInProgress)
+                return;
             console.log("QML RECEIVED FIREBASE DATA!");
 
             console.log("Downloaded shopping count:", shoppingItems.length);
@@ -123,7 +177,8 @@ ApplicationWindow {
         repeat: true
         triggeredOnStart: true
 
-        running: autoRefreshButton.checked && FirebaseManager.initialized
+        running: autoRefreshButton.checked && FirebaseManager.initialized && !FirebaseManager.childListening
+                 && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
         onTriggered: {
             console.log("Checking Firebase for updates...");
@@ -153,6 +208,43 @@ ApplicationWindow {
         }
 
         Button {
+            id: childListenerButton
+
+            text: checked ? "Stop Child Listener Test" : "Start Child Listener Test"
+            checkable: true
+            checked: false
+            Layout.fillWidth: true
+            enabled: FirebaseManager.initialized
+
+            onClicked: {
+                if (checked) {
+                    autoRefreshButton.checked = false;
+                    realtimeButton.checked = false;
+                    FirebaseManager.startChildListening();
+                } else {
+                    FirebaseManager.stopChildListening();
+                }
+                checked = FirebaseManager.childListening;
+            }
+        }
+
+        Label {
+            text: "Test mode: pending local writes are protected for this session. Cached-only items are retained."
+            visible: FirebaseManager.childListening
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+        }
+
+        Label {
+            text: window.syncError !== "" ? "Synchronization paused: " + window.syncError
+                  : FirebaseManager.bulkWriteInProgress ? "Uploading family data..."
+                  : "Synchronizing " + FirebaseManager.unresolvedItemCount + " item(s)..."
+            visible: window.syncError !== "" || FirebaseManager.unresolvedItemCount > 0 || FirebaseManager.bulkWriteInProgress
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+        }
+
+        Button {
             id: autoRefreshButton
 
             text: checked ? "Stop Auto Refresh (Test)" : "Start Auto Refresh (Test)"
@@ -162,7 +254,8 @@ ApplicationWindow {
 
             Layout.fillWidth: true
 
-            enabled: FirebaseManager.initialized
+            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+                     && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
         }
 
         Button {
@@ -170,7 +263,8 @@ ApplicationWindow {
 
             Layout.fillWidth: true
 
-            enabled: FirebaseManager.initialized
+            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+                     && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
             onClicked: {
                 FirebaseManager.saveFamilyData(shoppingModel.toVariantList(), savedItemsModel.toVariantList());
@@ -181,7 +275,8 @@ ApplicationWindow {
             text: "Download from Firebase (Test)"
 
             Layout.fillWidth: true
-            enabled: FirebaseManager.initialized
+            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+                     && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
             onClicked: {
                 FirebaseManager.loadFamilyData();
@@ -197,7 +292,7 @@ ApplicationWindow {
 
             Layout.fillWidth: true
 
-            enabled: FirebaseManager.initialized
+            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
 
             onClicked: {
                 if (checked) {
