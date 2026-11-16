@@ -7,6 +7,7 @@ ApplicationWindow {
 
     property bool loadingData: false
     property bool applyingRemoteChange: false
+    property string syncError: ""
 
     visible: true
     width: 390
@@ -118,6 +119,16 @@ ApplicationWindow {
             console.error("Child Listener Test stopped:", collection, message);
         }
 
+        function onItemSyncFailed(collection, itemId, message) {
+            window.syncError = collection + "/" + itemId + ": " + message;
+            console.error("Item synchronization paused:", window.syncError);
+        }
+
+        function onSyncStateChanged() {
+            if (FirebaseManager.failedItemCount === 0)
+                window.syncError = "";
+        }
+
         function onRemoteDataChanged(path) {
             console.log("Realtime update detected:", path);
 
@@ -125,7 +136,7 @@ ApplicationWindow {
         }
 
         function onFamilyDataLoaded(shoppingItems, savedItems) {
-            if (FirebaseManager.childListening)
+            if (FirebaseManager.childListening || FirebaseManager.unresolvedItemCount > 0 || FirebaseManager.bulkWriteInProgress)
                 return;
             console.log("QML RECEIVED FIREBASE DATA!");
 
@@ -167,6 +178,7 @@ ApplicationWindow {
         triggeredOnStart: true
 
         running: autoRefreshButton.checked && FirebaseManager.initialized && !FirebaseManager.childListening
+                 && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
         onTriggered: {
             console.log("Checking Firebase for updates...");
@@ -217,8 +229,17 @@ ApplicationWindow {
         }
 
         Label {
-            text: "Test mode: incoming data may overwrite local edits. Cached-only items are retained."
+            text: "Test mode: pending local writes are protected for this session. Cached-only items are retained."
             visible: FirebaseManager.childListening
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+        }
+
+        Label {
+            text: window.syncError !== "" ? "Synchronization paused: " + window.syncError
+                  : FirebaseManager.bulkWriteInProgress ? "Uploading family data..."
+                  : "Synchronizing " + FirebaseManager.unresolvedItemCount + " item(s)..."
+            visible: window.syncError !== "" || FirebaseManager.unresolvedItemCount > 0 || FirebaseManager.bulkWriteInProgress
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
         }
@@ -234,6 +255,7 @@ ApplicationWindow {
             Layout.fillWidth: true
 
             enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+                     && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
         }
 
         Button {
@@ -242,6 +264,7 @@ ApplicationWindow {
             Layout.fillWidth: true
 
             enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+                     && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
             onClicked: {
                 FirebaseManager.saveFamilyData(shoppingModel.toVariantList(), savedItemsModel.toVariantList());
@@ -253,6 +276,7 @@ ApplicationWindow {
 
             Layout.fillWidth: true
             enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+                     && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
             onClicked: {
                 FirebaseManager.loadFamilyData();

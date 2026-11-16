@@ -8,6 +8,8 @@
 #include <QByteArray>
 #include <QVariantMap>
 #include <memory>
+#include "itemsynccoordinator.h"
+#include "qtcallbackgate.h"
 
 #include <firebase/app.h>
 #include <firebase/database.h>
@@ -28,6 +30,9 @@ class FirebaseManager : public QObject
                 NOTIFY initializedChanged)
 
     Q_PROPERTY(bool childListening READ childListening NOTIFY childListeningChanged)
+    Q_PROPERTY(int unresolvedItemCount READ unresolvedItemCount NOTIFY syncStateChanged)
+    Q_PROPERTY(int failedItemCount READ failedItemCount NOTIFY syncStateChanged)
+    Q_PROPERTY(bool bulkWriteInProgress READ bulkWriteInProgress NOTIFY syncStateChanged)
 
 public:
     explicit FirebaseManager(
@@ -37,6 +42,9 @@ public:
 
     bool initialized() const;
     bool childListening() const { return m_childListening; }
+    int unresolvedItemCount() const { return m_itemSync.unresolvedCount(); }
+    int failedItemCount() const { return m_itemSync.failedCount(); }
+    bool bulkWriteInProgress() const { return m_itemSync.bulkBusy(); }
     Q_INVOKABLE void startChildListening();
     Q_INVOKABLE void stopChildListening();
 
@@ -87,10 +95,18 @@ signals:
     void shoppingItemRemoved(QString itemId);
     void savedItemReceived(QVariantMap item);
     void savedItemRemoved(QString itemId);
+    void syncStateChanged();
+    void itemSyncFailed(QString collection, QString itemId, QString message);
 
 private:
     friend class FirebaseChildListener;
     void initializeFirebase();
+    void performItemWrite(const QString &collection, const QString &id, quint64 generation,
+                          int kind, const QVariantMap &payload);
+    void performItemRead(const QString &collection, const QString &id, quint64 token);
+
+    ItemSyncCoordinator m_itemSync;
+    std::shared_ptr<QtCallbackGate> m_callbackGate;
 
     std::unique_ptr<FirebaseChildListener> m_shoppingListener;
     std::unique_ptr<FirebaseChildListener> m_savedListener;
