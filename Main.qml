@@ -73,11 +73,6 @@ ApplicationWindow {
             loadingData = false;
         }
 
-        // Save newly generated IDs back to local storage.
-        if (data.savedItems || data.shoppingItems) {
-            saveData();
-        }
-
         console.log("FamilyApp storage:", StorageManager.storagePath());
     }
 
@@ -88,10 +83,28 @@ ApplicationWindow {
         console.log("Saved items:", JSON.stringify(savedItemsModel.toVariantList()));
 
         console.log("Firebase initialized:", FirebaseManager.initialized);
+        FirebaseManager.beginInitialSync();
     }
 
     Connections {
         target: FirebaseManager
+
+        function onInitialDataVerified(attempt, shoppingItems, savedItems) {
+            // The manager emits only a fully validated, network-verified snapshot.
+            // Cache persistence and both model loads complete before Ready.
+            if (!StorageManager.saveData(shoppingItems, savedItems)) {
+                FirebaseManager.completeInitialSync(attempt, false, "Could not save the verified local cache.");
+                return;
+            }
+            window.loadingData = true;
+            try {
+                shoppingModel.loadFromVariantList(shoppingItems);
+                savedItemsModel.loadFromVariantList(savedItems);
+                FirebaseManager.completeInitialSync(attempt, true);
+            } finally {
+                window.loadingData = false;
+            }
+        }
 
         function onShoppingItemReceived(item) {
             window.applyRemoteChange(function () {
@@ -177,7 +190,7 @@ ApplicationWindow {
         repeat: true
         triggeredOnStart: true
 
-        running: autoRefreshButton.checked && FirebaseManager.initialized && !FirebaseManager.childListening
+        running: autoRefreshButton.checked && FirebaseManager.initialized && FirebaseManager.startupState === FirebaseManager.Ready && !FirebaseManager.childListening
                  && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
         onTriggered: {
@@ -190,18 +203,44 @@ ApplicationWindow {
         anchors.fill: parent
         spacing: 0
 
+        BusyIndicator {
+            Layout.alignment: Qt.AlignHCenter
+            running: FirebaseManager.startupState === FirebaseManager.Loading
+            visible: running
+        }
+
+        Label {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            visible: FirebaseManager.startupState !== FirebaseManager.Ready
+            text: FirebaseManager.startupState === FirebaseManager.Error
+                  ? FirebaseManager.startupError
+                  : "Verifying cloud data... Cached data is read-only."
+        }
+
+        Button {
+            text: "Retry synchronization"
+            Layout.fillWidth: true
+            visible: FirebaseManager.startupState === FirebaseManager.Error
+            onClicked: FirebaseManager.beginInitialSync()
+        }
+
         StackLayout {
+            objectName: "shoppingPages"
+            enabled: FirebaseManager.editingEnabled
             Layout.fillWidth: true
             Layout.fillHeight: true
 
             currentIndex: navigation.currentIndex
 
             ShoppingListPage {
+                objectName: "shoppingPage"
                 listModel: shoppingModel
                 savedModel: savedItemsModel
             }
 
             SavedItemsPage {
+                objectName: "savedPage"
                 savedModel: savedItemsModel
                 listModel: shoppingModel
             }
@@ -210,11 +249,11 @@ ApplicationWindow {
         Button {
             id: childListenerButton
 
-            text: checked ? "Stop Child Listener Test" : "Start Child Listener Test"
+            text: checked ? "Stop Live Synchronization" : "Start Live Synchronization"
             checkable: true
             checked: false
             Layout.fillWidth: true
-            enabled: FirebaseManager.initialized
+            enabled: FirebaseManager.initialized && FirebaseManager.startupState === FirebaseManager.Ready
 
             onClicked: {
                 if (checked) {
@@ -229,7 +268,7 @@ ApplicationWindow {
         }
 
         Label {
-            text: "Test mode: pending local writes are protected for this session. Cached-only items are retained."
+            text: "Online prototype: startup uses cloud data. Pending writes are protected for this session."
             visible: FirebaseManager.childListening
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
@@ -254,7 +293,7 @@ ApplicationWindow {
 
             Layout.fillWidth: true
 
-            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+            enabled: FirebaseManager.initialized && FirebaseManager.startupState === FirebaseManager.Ready && !FirebaseManager.childListening
                      && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
         }
 
@@ -263,7 +302,7 @@ ApplicationWindow {
 
             Layout.fillWidth: true
 
-            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+            enabled: FirebaseManager.initialized && FirebaseManager.startupState === FirebaseManager.Ready && !FirebaseManager.childListening
                      && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
             onClicked: {
@@ -275,7 +314,7 @@ ApplicationWindow {
             text: "Download from Firebase (Test)"
 
             Layout.fillWidth: true
-            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+            enabled: FirebaseManager.initialized && FirebaseManager.startupState === FirebaseManager.Ready && !FirebaseManager.childListening
                      && FirebaseManager.unresolvedItemCount === 0 && !FirebaseManager.bulkWriteInProgress
 
             onClicked: {
@@ -292,7 +331,7 @@ ApplicationWindow {
 
             Layout.fillWidth: true
 
-            enabled: FirebaseManager.initialized && !FirebaseManager.childListening
+            enabled: FirebaseManager.initialized && FirebaseManager.startupState === FirebaseManager.Ready && !FirebaseManager.childListening
 
             onClicked: {
                 if (checked) {
