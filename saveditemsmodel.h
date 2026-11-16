@@ -43,6 +43,10 @@ public:
   Q_INVOKABLE QString addItem(const QString &name);
   Q_INVOKABLE void removeItem(int row);
 
+  Q_INVOKABLE int findItemById(const QString &itemId) const;
+  Q_INVOKABLE void upsertRemoteItem(const QString &itemId, const QString &name);
+  Q_INVOKABLE void removeItemById(const QString &itemId);
+
   Q_INVOKABLE QVariantList toVariantList() const;
 
   Q_INVOKABLE void loadFromVariantList(

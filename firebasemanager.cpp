@@ -19,6 +19,153 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
+#include <QMetaObject>
+#include <QUuid>
+#include <mutex>
+
+// Firebase may call these methods off the Qt thread. The mutex protects the
+// receiver only while posting; all QObject access happens on its own thread.
+class FirebaseChildListener final : public firebase::database::ChildListener
+{
+public:
+    FirebaseChildListener(FirebaseManager *manager, const QString &collection,
+                          quint64 generation)
+        : m_manager(manager), m_collection(collection), m_generation(generation) {}
+
+    void invalidate()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_manager = nullptr;
+    }
+
+    void OnChildAdded(const firebase::database::DataSnapshot &snapshot,
+                      const char *) override { receive("added", snapshot); }
+    void OnChildChanged(const firebase::database::DataSnapshot &snapshot,
+                        const char *) override { receive("changed", snapshot); }
+    void OnChildRemoved(const firebase::database::DataSnapshot &snapshot) override
+    { receive("removed", snapshot); }
+    void OnChildMoved(const firebase::database::DataSnapshot &snapshot,
+                      const char *) override
+    {
+        // The UI preserves insertion order, not Firebase priority order.
+        if (!snapshot.is_valid())
+            return;
+        qDebug() << "Firebase child moved:" << m_collection
+                 << QString::fromStdString(snapshot.key_string());
+    }
+    void OnCancelled(const firebase::database::Error &error,
+                     const char *message) override
+    {
+        const QString description = QStringLiteral("%1: %2")
+            .arg(static_cast<int>(error)).arg(QString::fromUtf8(message ? message : ""));
+        qWarning() << "Firebase listener cancelled:" << m_collection << description;
+        post("cancelled", {}, description);
+    }
+
+private:
+    void receive(const QString &event, const firebase::database::DataSnapshot &snapshot)
+    {
+        if (!snapshot.is_valid()) {
+            qWarning() << "Invalid Firebase snapshot:" << m_collection << event;
+            return;
+        }
+        const QString id = QString::fromStdString(snapshot.key_string());
+        qDebug() << "Firebase child" << event << m_collection << id;
+        if (QUuid(id).isNull()) {
+            qWarning() << "Ignoring non-UUID Firebase key:" << m_collection << id;
+            return;
+        }
+        QVariantMap item{{"id", id}};
+        if (event != "removed") {
+            const auto name = snapshot.Child("name").value();
+            const auto storedId = snapshot.Child("id").value();
+            if (!name.is_string() || QString::fromUtf8(name.string_value()).trimmed().isEmpty()
+                || (!storedId.is_null() && (!storedId.is_string()
+                    || QString::fromUtf8(storedId.string_value()) != id))) {
+                qWarning() << "Malformed Firebase item:" << m_collection << id;
+                return;
+            }
+            item["name"] = QString::fromUtf8(name.string_value()).trimmed();
+            if (m_collection == "shoppingItems") {
+                const auto addedBy = snapshot.Child("addedBy").value();
+                const auto bought = snapshot.Child("bought").value();
+                if (!addedBy.is_string() || !bought.is_bool()) {
+                    qWarning() << "Malformed Firebase shopping fields:" << id;
+                    return;
+                }
+                item["addedBy"] = QString::fromUtf8(addedBy.string_value());
+                item["bought"] = bought.bool_value();
+            }
+        }
+        post(event, item, {});
+    }
+
+    void post(const QString &event, const QVariantMap &item, const QString &error)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_manager)
+            return;
+        auto *manager = m_manager;
+        const auto collection = m_collection;
+        const auto generation = m_generation;
+        QMetaObject::invokeMethod(manager, [manager, collection, generation, event, item, error]() {
+            if (!manager->m_childListening || manager->m_syncGeneration != generation)
+                return;
+            if (event == "cancelled") {
+                manager->stopChildListening();
+                emit manager->childListeningFailed(collection, error);
+            } else if (collection == "shoppingItems") {
+                if (event == "removed")
+                    emit manager->shoppingItemRemoved(item.value("id").toString());
+                else
+                    emit manager->shoppingItemReceived(item);
+            } else {
+                if (event == "removed")
+                    emit manager->savedItemRemoved(item.value("id").toString());
+                else
+                    emit manager->savedItemReceived(item);
+            }
+        }, Qt::QueuedConnection);
+    }
+
+    std::mutex m_mutex;
+    FirebaseManager *m_manager;
+    const QString m_collection;
+    const quint64 m_generation;
+};
+
+void FirebaseManager::startChildListening()
+{
+    if (!m_initialized || !m_database || m_childListening)
+        return;
+    stopRealtimeListening();
+    ++m_syncGeneration; // Also invalidates any outstanding REST response.
+    m_downloadAgain = false;
+    m_childListening = true;
+    m_shoppingListener = std::make_unique<FirebaseChildListener>(this, "shoppingItems", m_syncGeneration);
+    m_savedListener = std::make_unique<FirebaseChildListener>(this, "savedItems", m_syncGeneration);
+    const auto family = m_database->GetReference().Child("familyData");
+    family.Child("shoppingItems").AddChildListener(m_shoppingListener.get());
+    family.Child("savedItems").AddChildListener(m_savedListener.get());
+    emit childListeningChanged();
+}
+
+void FirebaseManager::stopChildListening()
+{
+    if (!m_childListening)
+        return;
+    m_childListening = false;
+    ++m_syncGeneration;
+    // Stop callbacks from posting before detaching and deleting their listeners.
+    m_shoppingListener->invalidate();
+    m_savedListener->invalidate();
+    const auto family = m_database->GetReference().Child("familyData");
+    family.Child("shoppingItems").RemoveChildListener(m_shoppingListener.get());
+    family.Child("savedItems").RemoveChildListener(m_savedListener.get());
+    m_shoppingListener.reset();
+    m_savedListener.reset();
+    emit childListeningChanged();
+}
 
 FirebaseManager::FirebaseManager(QObject *parent)
     : QObject(parent)
@@ -30,6 +177,7 @@ FirebaseManager::FirebaseManager(QObject *parent)
 FirebaseManager::~FirebaseManager()
 {
 
+    stopChildListening();
     stopRealtimeListening();
 
     if (m_database != nullptr)
@@ -151,6 +299,10 @@ void FirebaseManager::saveFamilyData(
     const QVariantList &shoppingItems,
     const QVariantList &savedItems)
 {
+    if (m_childListening) {
+        qWarning() << "Bulk upload disabled during Child Listener Test.";
+        return;
+    }
     if (!m_initialized || m_database == nullptr)
     {
         qWarning() << "Firebase is not initialized.";
@@ -256,6 +408,10 @@ void FirebaseManager::saveFamilyData(
 
 void FirebaseManager::loadFamilyData()
 {
+    if (m_childListening) {
+        qWarning() << "REST download disabled during Child Listener Test.";
+        return;
+    }
     if (!m_initialized || m_database == nullptr)
     {
         emit familyDataLoadFailed("Firebase is not initialized.");
@@ -284,11 +440,21 @@ void FirebaseManager::loadFamilyData()
     request.setRawHeader("Cache-Control", "no-cache");
 
     QNetworkReply *reply = m_networkManager.get(request);
+    const auto generation = m_syncGeneration;
 
     connect(reply, &QNetworkReply::finished, this,
-            [this, reply]()
+            [this, reply, generation]()
             {
                 m_downloadInProgress = false;
+
+                if (generation != m_syncGeneration || m_childListening) {
+                    const bool downloadAgain = m_downloadAgain && !m_childListening;
+                    m_downloadAgain = false;
+                    reply->deleteLater();
+                    if (downloadAgain)
+                        QTimer::singleShot(0, this, [this]() { loadFamilyData(); });
+                    return;
+                }
 
                 if (m_downloadAgain)
                 {
@@ -616,6 +782,10 @@ void FirebaseManager::deleteSavedItem(
 
 void FirebaseManager::startRealtimeListening()
 {
+    if (m_childListening) {
+        qWarning() << "SSE disabled during Child Listener Test.";
+        return;
+    }
     if (!m_initialized || m_database == nullptr)
     {
         qWarning() << "Firebase is not initialized.";

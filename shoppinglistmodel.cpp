@@ -235,6 +235,55 @@ void ShoppingListModel::setBought(
       BoughtRole);
 }
 
+int ShoppingListModel::findItemById(const QString &itemId) const
+{
+  for (int row = 0; row < m_items.size(); ++row)
+    if (m_items.at(row).id == itemId)
+      return row;
+  return -1;
+}
+
+void ShoppingListModel::upsertRemoteItem(const QString &itemId, const QString &name,
+                                       const QString &addedBy, bool bought)
+{
+  const QString cleanName = name.trimmed();
+  if (itemId.isEmpty() || cleanName.isEmpty())
+    return;
+  const int row = findItemById(itemId);
+  if (row < 0) {
+    const int newRow = m_items.size();
+    beginInsertRows(QModelIndex(), newRow, newRow);
+    m_items.append({itemId, cleanName, addedBy, bought});
+    endInsertRows();
+    emit countChanged();
+    emit itemsChanged();
+    return;
+  }
+  auto &item = m_items[row];
+  QList<int> roles;
+  if (item.name != cleanName) {
+    item.name = cleanName;
+    roles.append(NameRole);
+  }
+  if (item.addedBy != addedBy) {
+    item.addedBy = addedBy;
+    roles.append(AddedByRole);
+  }
+  if (item.bought != bought) {
+    item.bought = bought;
+    roles.append(BoughtRole);
+  }
+  if (!roles.isEmpty()) {
+    emit dataChanged(index(row, 0), index(row, 0), roles);
+    emit itemsChanged();
+  }
+}
+
+void ShoppingListModel::removeItemById(const QString &itemId)
+{
+  removeItem(findItemById(itemId));
+}
+
 QVariantList
 ShoppingListModel::toVariantList() const
 {

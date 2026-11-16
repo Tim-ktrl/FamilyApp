@@ -6,11 +6,15 @@
 #include <QTimer>
 #include <QNetworkAccessManager>
 #include <QByteArray>
+#include <QVariantMap>
+#include <memory>
 
 #include <firebase/app.h>
 #include <firebase/database.h>
 #include <firebase/future.h>
 #include <QNetworkReply>
+
+class FirebaseChildListener;
 
 class FirebaseManager : public QObject
 {
@@ -23,6 +27,8 @@ class FirebaseManager : public QObject
             READ initialized
                 NOTIFY initializedChanged)
 
+    Q_PROPERTY(bool childListening READ childListening NOTIFY childListeningChanged)
+
 public:
     explicit FirebaseManager(
         QObject *parent = nullptr);
@@ -30,6 +36,9 @@ public:
     ~FirebaseManager() override;
 
     bool initialized() const;
+    bool childListening() const { return m_childListening; }
+    Q_INVOKABLE void startChildListening();
+    Q_INVOKABLE void stopChildListening();
 
     Q_INVOKABLE void testWrite();
 
@@ -72,9 +81,21 @@ signals:
     void familyDataLoadFailed(QString message);
 
     void remoteDataChanged(QString path);
+    void childListeningChanged();
+    void childListeningFailed(QString collection, QString message);
+    void shoppingItemReceived(QVariantMap item);
+    void shoppingItemRemoved(QString itemId);
+    void savedItemReceived(QVariantMap item);
+    void savedItemRemoved(QString itemId);
 
 private:
+    friend class FirebaseChildListener;
     void initializeFirebase();
+
+    std::unique_ptr<FirebaseChildListener> m_shoppingListener;
+    std::unique_ptr<FirebaseChildListener> m_savedListener;
+    bool m_childListening = false;
+    quint64 m_syncGeneration = 0;
 
     firebase::App *m_app = nullptr;
 

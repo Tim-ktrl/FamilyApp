@@ -23,3 +23,7 @@ android-build/
 
 google-services.json
 google-services-desktop.json
+
+*.md
+docs/
+tests/
