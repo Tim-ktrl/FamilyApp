@@ -16,7 +16,6 @@ Page {
 
         // An empty ID means nothing was added.
         if (!newId) {
-            console.log("Item already saved or invalid.");
             return;
         }
 
