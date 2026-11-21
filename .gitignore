@@ -17,6 +17,12 @@ compile_commands.json
 android-build/
 *.apk
 *.aab
+*.jks
+*.keystore
+keystore.properties
+
+# Firebase Android resources are generated only in ignored build directories.
+googleservices.xml
 
 # VS Code temporary files
 .vscode/*.log
