@@ -7,12 +7,11 @@
 #endif
 
 #include <QDebug>
-#include <QDir>
+#include <QLoggingCategory>
 #include <QVariantMap>
 
 #include <map>
 #include <string>
-#include <vector>
 
 #include <firebase/future.h>
 #include <firebase/variant.h>
@@ -21,13 +20,15 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QUrl>
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
 #include <QMetaObject>
 #include <QUuid>
 #include <mutex>
+
+Q_LOGGING_CATEGORY(firebaseListeners, "familyapp.firebase.listeners", QtWarningMsg)
+Q_LOGGING_CATEGORY(firebaseSync, "familyapp.firebase.sync", QtWarningMsg)
 
 namespace {
 bool parseFirebaseItem(const firebase::database::DataSnapshot &snapshot,
@@ -166,7 +167,7 @@ public:
         // The UI preserves insertion order, not Firebase priority order.
         if (!snapshot.is_valid())
             return;
-        qDebug() << "Firebase child moved:" << m_collection
+        qCDebug(firebaseListeners) << "Firebase child moved:" << m_collection
                  << QString::fromStdString(snapshot.key_string());
     }
     void OnCancelled(const firebase::database::Error &error,
@@ -187,7 +188,7 @@ private:
             return;
         }
         const QString id = QString::fromStdString(snapshot.key_string());
-        qDebug() << "Firebase child" << event << m_collection << id;
+        qCDebug(firebaseListeners) << "Firebase child" << event << m_collection << id;
         QVariantMap item;
         QString error;
         if (!parseFirebaseItem(snapshot, m_collection, id, item, error, event == "removed")) {
@@ -212,7 +213,6 @@ private:
             if (event == "cancelled") {
                 manager->stopChildListening();
                 manager->m_initialSync.fail("Live listener cancelled: " + error);
-                emit manager->childListeningFailed(collection, error);
             } else {
                 manager->receiveChildEvent(collection, item, event == "removed", revision);
             }
@@ -228,27 +228,24 @@ private:
 
 void FirebaseManager::startChildListening()
 {
-    qInfo() << "[Firebase listeners] startChildListening" << this << "active" << m_childListening
+    qCDebug(firebaseListeners) << "[Firebase listeners] startChildListening" << this << "active" << m_childListening
             << "generation" << m_syncGeneration << "attempt" << m_initialSync.attempt();
     if (!m_initialized || !m_database || m_childListening) {
-        qInfo() << "[Firebase listeners] child start skipped" << this;
+        qCDebug(firebaseListeners) << "[Firebase listeners] child start skipped" << this;
         return;
     }
-    stopRealtimeListening();
-    ++m_syncGeneration; // Also invalidates any outstanding REST response.
-    m_downloadAgain = false;
+    ++m_syncGeneration; // Fence callbacks from an earlier child subscription.
     m_childListening = true;
     m_itemSync.setListening(true);
     m_shoppingListener = std::make_unique<FirebaseChildListener>(this, "shoppingItems", m_syncGeneration);
     m_savedListener = std::make_unique<FirebaseChildListener>(this, "savedItems", m_syncGeneration);
     const auto family = m_database->GetReference().Child("familyData");
-    qInfo() << "[Firebase listeners] AddChild /familyData/shoppingItems" << this
+    qCDebug(firebaseListeners) << "[Firebase listeners] AddChild /familyData/shoppingItems" << this
             << m_shoppingListener.get() << "generation" << m_syncGeneration;
     family.Child("shoppingItems").AddChildListener(m_shoppingListener.get());
-    qInfo() << "[Firebase listeners] AddChild /familyData/savedItems" << this
+    qCDebug(firebaseListeners) << "[Firebase listeners] AddChild /familyData/savedItems" << this
             << m_savedListener.get() << "generation" << m_syncGeneration;
     family.Child("savedItems").AddChildListener(m_savedListener.get());
-    emit childListeningChanged();
     emit startupChanged();
 }
 
@@ -263,15 +260,14 @@ void FirebaseManager::stopChildListening()
     m_shoppingListener->invalidate();
     m_savedListener->invalidate();
     const auto family = m_database->GetReference().Child("familyData");
-    qInfo() << "[Firebase listeners] RemoveChild /familyData/shoppingItems" << this
+    qCDebug(firebaseListeners) << "[Firebase listeners] RemoveChild /familyData/shoppingItems" << this
             << m_shoppingListener.get() << "generation" << m_syncGeneration;
     family.Child("shoppingItems").RemoveChildListener(m_shoppingListener.get());
-    qInfo() << "[Firebase listeners] RemoveChild /familyData/savedItems" << this
+    qCDebug(firebaseListeners) << "[Firebase listeners] RemoveChild /familyData/savedItems" << this
             << m_savedListener.get() << "generation" << m_syncGeneration;
     family.Child("savedItems").RemoveChildListener(m_savedListener.get());
     m_shoppingListener.reset();
     m_savedListener.reset();
-    emit childListeningChanged();
     emit startupChanged();
     if (m_initialSync.state() != InitialSyncCoordinator::Error)
         m_initialSync.fail("Live synchronization stopped. Retry initial synchronization to resume editing.");
@@ -285,6 +281,8 @@ FirebaseManager::FirebaseManager(QObject *parent)
     m_itemSync.verifyRemoteEvents(true);
     connect(&m_initialSync, &InitialSyncCoordinator::changed, this, &FirebaseManager::startupChanged);
     connect(&m_initialSync, &InitialSyncCoordinator::changed, this, [this]() {
+        if (startupState() == Error)
+            qWarning() << "Synchronization unavailable:" << startupError();
         if (startupState() != Loading) {
             const auto attempt = m_initialSync.attempt();
             QTimer::singleShot(0, this, [this, attempt]() {
@@ -329,13 +327,12 @@ FirebaseManager::~FirebaseManager()
     m_callbackGate->invalidate();
     stopStartupValueListeners();
     if (m_connectionListener) {
-        qInfo() << "[Firebase listeners] RemoveValue /.info/connected" << this << m_connectionListener.get();
+        qCDebug(firebaseListeners) << "[Firebase listeners] RemoveValue /.info/connected" << this << m_connectionListener.get();
         m_connectionListener->invalidate();
         m_database->GetReference(".info/connected").RemoveValueListener(m_connectionListener.get());
         m_connectionListener.reset();
     }
     stopChildListening();
-    stopRealtimeListening();
 
     if (m_database != nullptr)
     {
@@ -379,7 +376,7 @@ void FirebaseManager::startInitialAttempt(quint64 attempt)
     m_itemSync.clearRemoteReads();
     startChildListening();
     if (m_connectionListenerFailed && m_connectionListener) {
-        qInfo() << "[Firebase listeners] RemoveValue /.info/connected (failed)" << this << m_connectionListener.get();
+        qCDebug(firebaseListeners) << "[Firebase listeners] RemoveValue /.info/connected (failed)" << this << m_connectionListener.get();
         m_connectionListener->invalidate();
         m_database->GetReference(".info/connected").RemoveValueListener(m_connectionListener.get());
         m_connectionListener.reset();
@@ -387,17 +384,17 @@ void FirebaseManager::startInitialAttempt(quint64 attempt)
     }
     if (!m_connectionListener) {
         m_connectionListener = std::make_unique<FirebaseValueListener>(this, QString(), 0);
-        qInfo() << "[Firebase listeners] AddValue /.info/connected" << this << m_connectionListener.get();
+        qCDebug(firebaseListeners) << "[Firebase listeners] AddValue /.info/connected" << this << m_connectionListener.get();
         m_database->GetReference(".info/connected").AddValueListener(m_connectionListener.get());
     }
     // Same-query value/child registrations share a view in the SDK. Never attach
     // an ancestor /familyData value query: its removal can restore child listens twice.
     m_startupShoppingListener = std::make_unique<FirebaseValueListener>(this, "shoppingItems", attempt);
     m_startupSavedListener = std::make_unique<FirebaseValueListener>(this, "savedItems", attempt);
-    qInfo() << "[Firebase listeners] AddValue /familyData/shoppingItems" << this
+    qCDebug(firebaseListeners) << "[Firebase listeners] AddValue /familyData/shoppingItems" << this
             << m_startupShoppingListener.get() << "attempt" << attempt;
     m_database->GetReference("familyData/shoppingItems").AddValueListener(m_startupShoppingListener.get());
-    qInfo() << "[Firebase listeners] AddValue /familyData/savedItems" << this
+    qCDebug(firebaseListeners) << "[Firebase listeners] AddValue /familyData/savedItems" << this
             << m_startupSavedListener.get() << "attempt" << attempt;
     m_database->GetReference("familyData/savedItems").AddValueListener(m_startupSavedListener.get());
 }
@@ -410,14 +407,14 @@ void FirebaseManager::stopStartupValueListeners()
         reply->abort();
     }
     if (m_startupShoppingListener) {
-        qInfo() << "[Firebase listeners] RemoveValue /familyData/shoppingItems" << this
+        qCDebug(firebaseListeners) << "[Firebase listeners] RemoveValue /familyData/shoppingItems" << this
                 << m_startupShoppingListener.get() << "attempt" << m_initialSync.attempt();
         m_startupShoppingListener->invalidate();
         m_database->GetReference("familyData/shoppingItems").RemoveValueListener(m_startupShoppingListener.get());
         m_startupShoppingListener.reset();
     }
     if (m_startupSavedListener) {
-        qInfo() << "[Firebase listeners] RemoveValue /familyData/savedItems" << this
+        qCDebug(firebaseListeners) << "[Firebase listeners] RemoveValue /familyData/savedItems" << this
                 << m_startupSavedListener.get() << "attempt" << m_initialSync.attempt();
         m_startupSavedListener->invalidate();
         m_database->GetReference("familyData/savedItems").RemoveValueListener(m_startupSavedListener.get());
@@ -427,7 +424,7 @@ void FirebaseManager::stopStartupValueListeners()
 
 void FirebaseManager::updateStartupBlock()
 {
-    m_initialSync.setBlocked(m_itemSync.unresolvedLocalCount() > 0 || bulkWriteInProgress());
+    m_initialSync.setBlocked(m_itemSync.unresolvedLocalCount() > 0 || m_itemSync.bulkBusy());
     if (connected() && startupState() == Loading && m_ackReadAttempt != m_initialSync.attempt()) {
         m_ackReadAttempt = m_initialSync.attempt();
         m_itemSync.revalidateAcknowledged();
@@ -489,13 +486,6 @@ bool FirebaseManager::writesAllowed(const QString &collection, const QString &id
 
 void FirebaseManager::initializeFirebase()
 {
-    qDebug()
-        << "Firebase current working directory:"
-        << QDir::currentPath();
-
-    qDebug()
-        << "Initializing Firebase...";
-
 #ifdef Q_OS_ANDROID
     QJniEnvironment env;
     const auto activity = QNativeInterface::QAndroidApplication::context();
@@ -543,295 +533,7 @@ void FirebaseManager::initializeFirebase()
 
     emit initializedChanged();
 
-    qDebug()
-        << "Firebase initialized successfully.";
 
-    qDebug()
-        << "Database URL:"
-        << m_database->url();
-}
-
-void FirebaseManager::testWrite()
-{
-    if (!writesAllowed("debug", "message")) return;
-    if (!m_initialized ||
-        m_database == nullptr)
-    {
-        qWarning()
-            << "Cannot write: Firebase is not initialized.";
-
-        return;
-    }
-
-    firebase::database::DatabaseReference reference =
-        m_database
-            ->GetReference()
-            .Child("debug")
-            .Child("message");
-
-    firebase::Future<void> future =
-        reference.SetValue(
-            firebase::Variant(
-                "Hello from FamilyApp"));
-
-    future.OnCompletion(
-        [](const firebase::Future<void> &result)
-        {
-            if (result.error() == 0)
-            {
-                qDebug()
-                    << "Firebase test write successful.";
-            }
-            else
-            {
-                qWarning()
-                    << "Firebase test write failed:"
-                    << result.error()
-                    << result.error_message();
-            }
-        });
-}
-
-void FirebaseManager::saveFamilyData(
-    const QVariantList &shoppingItems,
-    const QVariantList &savedItems)
-{
-    if (!writesAllowed("familyData", "bulk")) return;
-    if (m_childListening || unresolvedItemCount() || bulkWriteInProgress()) {
-        qWarning() << "Bulk upload disabled during child listening or unresolved synchronization.";
-        return;
-    }
-    if (!m_initialized || m_database == nullptr)
-    {
-        qWarning() << "Firebase is not initialized.";
-        return;
-    }
-
-    // Convert shopping items.
-    // Convert shopping items into an ID-keyed map.
-    std::map<std::string, firebase::Variant> shoppingData;
-
-    for (const QVariant &value : shoppingItems)
-    {
-        QVariantMap item = value.toMap();
-
-        QString id = item.value("id").toString().trimmed();
-
-        if (id.isEmpty())
-        {
-            qWarning() << "Shopping item is missing an ID.";
-            return;
-        }
-
-        std::map<std::string, firebase::Variant> itemData;
-
-        itemData["id"] = firebase::Variant(
-            id.toUtf8().toStdString());
-
-        itemData["name"] = firebase::Variant(
-            item.value("name").toString().toUtf8().toStdString());
-
-        itemData["addedBy"] = firebase::Variant(
-            item.value("addedBy").toString().toUtf8().toStdString());
-
-        itemData["bought"] = firebase::Variant(
-            item.value("bought").toBool());
-
-        // Store the item using its ID as its Firebase key.
-        shoppingData[id.toUtf8().toStdString()] =
-            firebase::Variant(itemData);
-    }
-
-    // Convert saved items.
-    // Convert saved items into an ID-keyed map.
-    std::map<std::string, firebase::Variant> savedData;
-
-    for (const QVariant &value : savedItems)
-    {
-        QVariantMap item = value.toMap();
-
-        QString id = item.value("id").toString().trimmed();
-
-        if (id.isEmpty())
-        {
-            qWarning() << "Saved item is missing an ID.";
-            return;
-        }
-
-        std::map<std::string, firebase::Variant> itemData;
-
-        itemData["id"] = firebase::Variant(
-            id.toUtf8().toStdString());
-
-        itemData["name"] = firebase::Variant(
-            item.value("name").toString().toUtf8().toStdString());
-
-        savedData[id.toUtf8().toStdString()] =
-            firebase::Variant(itemData);
-    }
-
-    // Combine both lists.
-    std::map<std::string, firebase::Variant> familyData;
-
-    familyData["shoppingItems"] =
-        firebase::Variant(shoppingData);
-
-    familyData["savedItems"] =
-        firebase::Variant(savedData);
-
-    // Get our Firebase location.
-    firebase::database::DatabaseReference reference =
-        m_database->GetReference().Child("familyData");
-
-    // Upload the data.
-    ++m_syncGeneration; // Fence any REST snapshot started before this parent write.
-    m_itemSync.setBulkBusy(true);
-    firebase::Future<void> future =
-        reference.SetValue(firebase::Variant(familyData));
-
-    future.OnCompletion(
-        [gate = m_callbackGate, this](const firebase::Future<void> &result)
-        {
-            const QString error = result.error() == 0 ? QString()
-                : QStringLiteral("Bulk upload error %1: %2").arg(result.error())
-                    .arg(QString::fromUtf8(result.error_message() ? result.error_message() : "Unknown error"));
-            gate->post([this, error]() {
-                m_itemSync.setBulkBusy(false);
-                if (error.isEmpty()) qDebug() << "Family data saved to Firebase!";
-                else emit familyDataLoadFailed("Bulk upload failed: " + error);
-            });
-        });
-}
-
-void FirebaseManager::loadFamilyData()
-{
-    if (startupState() != Ready) {
-        emit familyDataLoadFailed("Initial online synchronization is not ready.");
-        return;
-    }
-    if (m_childListening || unresolvedItemCount() || bulkWriteInProgress()) {
-        qWarning() << "REST download disabled during child listening or unresolved synchronization.";
-        return;
-    }
-    if (!m_initialized || m_database == nullptr)
-    {
-        emit familyDataLoadFailed("Firebase is not initialized.");
-        return;
-    }
-
-    if (m_downloadInProgress)
-    {
-        m_downloadAgain = true;
-
-        qDebug()
-            << "Download in progress. Another refresh queued.";
-
-        return;
-    }
-
-    m_downloadInProgress = true;
-
-    auto reference =
-        m_database->GetReference().Child("familyData");
-
-    QString url =
-        QString::fromStdString(reference.url()) + ".json";
-
-    QNetworkRequest request{QUrl(url)};
-    request.setRawHeader("Cache-Control", "no-cache");
-
-    QNetworkReply *reply = m_networkManager.get(request);
-    const auto generation = m_syncGeneration;
-    const auto mutationGeneration = m_itemSync.mutationGeneration();
-
-    connect(reply, &QNetworkReply::finished, this,
-            [this, reply, generation, mutationGeneration]()
-            {
-                m_downloadInProgress = false;
-
-                if (generation != m_syncGeneration || m_childListening
-                    || mutationGeneration != m_itemSync.mutationGeneration()
-                    || unresolvedItemCount() || bulkWriteInProgress()) {
-                    const bool downloadAgain = m_downloadAgain && !m_childListening
-                        && !unresolvedItemCount() && !bulkWriteInProgress();
-                    m_downloadAgain = false;
-                    reply->deleteLater();
-                    if (downloadAgain)
-                        QTimer::singleShot(0, this, [this]() { loadFamilyData(); });
-                    return;
-                }
-
-                if (m_downloadAgain)
-                {
-                    m_downloadAgain = false;
-
-                    QTimer::singleShot(0, this, [this]()
-                                       { loadFamilyData(); });
-                }
-
-                QByteArray response = reply->readAll();
-                auto networkError = reply->error();
-                QString errorMessage = reply->errorString();
-
-                reply->deleteLater();
-
-                if (networkError != QNetworkReply::NoError)
-                {
-                    emit familyDataLoadFailed(errorMessage);
-                    return;
-                }
-
-                QJsonParseError parseError;
-                QJsonDocument document =
-                    QJsonDocument::fromJson(response, &parseError);
-
-                if (parseError.error != QJsonParseError::NoError ||
-                    !document.isObject())
-                {
-                    emit familyDataLoadFailed(
-                        "Invalid or missing Firebase JSON data.");
-                    return;
-                }
-
-                QJsonObject data = document.object();
-
-                // Convert JSON arrays or indexed objects to QVariantLists.
-                auto convertItems = [](const QJsonValue &value)
-                {
-                    QVariantList items;
-
-                    if (value.isArray())
-                    {
-                        for (const auto &entry : value.toArray())
-                        {
-                            if (entry.isObject())
-                                items.append(entry.toObject().toVariantMap());
-                        }
-                    }
-                    else if (value.isObject())
-                    {
-                        for (const auto &entry : value.toObject())
-                        {
-                            if (entry.isObject())
-                                items.append(entry.toObject().toVariantMap());
-                        }
-                    }
-
-                    return items;
-                };
-
-                QVariantList shoppingItems =
-                    convertItems(data.value("shoppingItems"));
-
-                QVariantList savedItems =
-                    convertItems(data.value("savedItems"));
-
-                qDebug() << "REST download successful!";
-                qDebug() << "Shopping items:" << shoppingItems.size();
-                qDebug() << "Saved items:" << savedItems.size();
-
-                emit familyDataLoaded(shoppingItems, savedItems);
-            });
 }
 
 void FirebaseManager::updateShoppingItemBought(const QString &itemId, bool bought)
@@ -905,13 +607,13 @@ void FirebaseManager::performItemWrite(const QString &collection, const QString 
         }
         future = reference.SetValue(firebase::Variant(fields));
     }
-    qDebug() << "Item write started:" << collection << id << generation << kind;
+    qCDebug(firebaseSync) << "Item write started:" << collection << id << generation << kind;
     future.OnCompletion([gate = m_callbackGate, this, collection, id, generation](const firebase::Future<void> &result) {
         const QString error = result.error() == 0 ? QString()
             : QStringLiteral("Write error %1: %2").arg(result.error())
                   .arg(QString::fromUtf8(result.error_message() ? result.error_message() : "Unknown error"));
         gate->post([this, collection, id, generation, error]() {
-            qDebug() << "Item write completed:" << collection << id << generation << error;
+            qCDebug(firebaseSync) << "Item write completed:" << collection << id << generation << error;
             m_itemSync.completeWrite(collection, id, generation, error);
         });
     });
@@ -949,210 +651,4 @@ void FirebaseManager::performItemRead(const QString &collection, const QString &
         reply->deleteLater();
         m_itemSync.completeRead(collection, id, token, item, removed, error);
     });
-}
-
-void FirebaseManager::startRealtimeListening()
-{
-    if (startupState() != Ready) return;
-    if (m_childListening) {
-        qWarning() << "SSE disabled during Child Listener Test.";
-        return;
-    }
-    if (!m_initialized || m_database == nullptr)
-    {
-        qWarning() << "Firebase is not initialized.";
-        return;
-    }
-
-    if (m_streamReply != nullptr)
-    {
-        qDebug() << "Realtime listener already running.";
-        return;
-    }
-
-    m_streamBuffer.clear();
-    m_currentEventType.clear();
-    m_currentEventData.clear();
-
-    m_waitingForInitialSnapshot = true;
-
-    // Get the Firebase location to monitor.
-    auto reference =
-        m_database->GetReference().Child("familyData");
-
-    QString url =
-        QString::fromStdString(reference.url()) + ".json";
-
-    QNetworkRequest request{QUrl(url)};
-
-    // Tell Firebase we want a continuous event stream.
-    request.setRawHeader("Accept", "text/event-stream");
-
-    // Allow HTTPS redirects used by Firebase.
-    request.setAttribute(
-        QNetworkRequest::RedirectPolicyAttribute,
-        QNetworkRequest::NoLessSafeRedirectPolicy);
-
-    // Open the connection.
-    QNetworkReply *reply = m_networkManager.get(request);
-
-    m_streamReply = reply;
-
-    qDebug() << "Realtime listener started.";
-
-    // Called whenever new data arrives.
-    connect(
-        reply,
-        &QIODevice::readyRead,
-        this,
-        [this, reply]()
-        {
-            if (reply != m_streamReply)
-                return;
-
-            processRealtimeData(reply->readAll());
-        });
-
-    // Called if the connection closes.
-    connect(
-        reply,
-        &QNetworkReply::finished,
-        this,
-        [this, reply]()
-        {
-            bool wasActive = (m_streamReply == reply);
-
-            if (wasActive)
-            {
-                m_streamReply = nullptr;
-
-                if (reply->error() != QNetworkReply::NoError)
-                {
-                    qWarning()
-                        << "Realtime connection error:"
-                        << reply->errorString();
-                }
-                else
-                {
-                    qDebug() << "Realtime connection closed.";
-                }
-            }
-
-            reply->deleteLater();
-        });
-}
-
-void FirebaseManager::stopRealtimeListening()
-{
-    if (m_streamReply == nullptr)
-    {
-        return;
-    }
-
-    QNetworkReply *reply = m_streamReply;
-
-    m_streamReply = nullptr;
-
-    reply->abort();
-
-    qDebug() << "Realtime listener stopped.";
-}
-
-void FirebaseManager::processRealtimeData(
-    const QByteArray &bytes)
-{
-    // Keep incoming bytes until we have complete lines.
-    m_streamBuffer.append(bytes);
-
-    while (true)
-    {
-        qsizetype newlinePos = m_streamBuffer.indexOf('\n');
-
-        if (newlinePos < 0)
-            break;
-
-        QByteArray line = m_streamBuffer.left(newlinePos);
-        m_streamBuffer.remove(0, newlinePos + 1);
-
-        // Handle Windows-style line endings.
-        if (line.endsWith('\r'))
-            line.chop(1);
-
-        // A blank line marks the end of an SSE event.
-        if (line.isEmpty())
-        {
-            QByteArray eventType = m_currentEventType;
-            QByteArray eventData = m_currentEventData;
-
-            m_currentEventType.clear();
-            m_currentEventData.clear();
-
-            if (eventType == "put" || eventType == "patch")
-            {
-                QJsonParseError error;
-
-                QJsonDocument document =
-                    QJsonDocument::fromJson(eventData, &error);
-
-                if (error.error != QJsonParseError::NoError ||
-                    !document.isObject())
-                {
-                    qWarning() << "Invalid realtime event JSON.";
-                    continue;
-                }
-
-                QJsonObject payload = document.object();
-
-                QString path =
-                    payload.value("path").toString();
-
-                if (path.isEmpty())
-                    continue;
-
-                // Skip the initial full snapshot for this test.
-                if (m_waitingForInitialSnapshot &&
-                    eventType == "put" &&
-                    path == "/")
-                {
-                    m_waitingForInitialSnapshot = false;
-
-                    qDebug() << "Initial Firebase snapshot received.";
-                    continue;
-                }
-
-                qDebug() << "Firebase changed at:" << path;
-
-                emit remoteDataChanged(path);
-            }
-            else if (eventType == "cancel" ||
-                     eventType == "auth_revoked")
-            {
-                qWarning()
-                    << "Firebase stream stopped:"
-                    << eventType
-                    << eventData;
-
-                stopRealtimeListening();
-                return;
-            }
-
-            // Ignore keep-alive events.
-            continue;
-        }
-
-        if (line.startsWith(':'))
-            continue;
-
-        if (line.startsWith("event:"))
-        {
-            m_currentEventType = line.mid(6).trimmed();
-        }
-        else if (line.startsWith("data:"))
-        {
-            if (!m_currentEventData.isEmpty())
-                m_currentEventData.append('\n');
-
-            m_currentEventData.append(line.mid(5).trimmed());
-        }
-    }
 }

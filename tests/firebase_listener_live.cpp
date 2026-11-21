@@ -8,6 +8,7 @@
 #include <QSet>
 #include <QTimer>
 #include <QDebug>
+#include <QLoggingCategory>
 #include <firebase/log.h>
 #include <cstdio>
 #include <cstdlib>
@@ -56,6 +57,8 @@ int main(int argc, char **argv)
         if (level == firebase::kLogLevelAssert) std::abort();
     }, nullptr);
 
+    // Keep registration/write evidence in this explicitly opted-in diagnostic.
+    QLoggingCategory::setFilterRules("familyapp.firebase.listeners.debug=true\nfamilyapp.firebase.sync.debug=true");
     auto manager = std::make_unique<FirebaseManager>();
     if (!manager->initialized()) return 2;
     auto *database = firebase::database::Database::GetInstance(firebase::App::GetInstance(),

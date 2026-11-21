@@ -87,6 +87,41 @@ private slots:
         QCOMPARE(storage->json, previous);
         QCOMPARE(firebase->writeCalls, 0);
     }
+    void userFeedbackWithoutDeveloperControls()
+    {
+        QQmlApplicationEngine engine;
+        auto *firebase = engine.singletonInstance<StartupFirebaseMock *>("FamilyAppStartupTests", "FirebaseManager");
+        engine.loadFromModule("FamilyAppStartupTests", "Main");
+        QVERIFY(!engine.rootObjects().isEmpty());
+        auto *window = engine.rootObjects().first();
+        auto *pages = window->findChild<QQuickItem *>("shoppingPages");
+        auto *retry = window->findChild<QQuickItem *>("retrySynchronizationButton");
+        auto *status = window->findChild<QQuickItem *>("itemSyncStatus");
+        QVERIFY(pages);
+        QVERIFY(retry);
+        QVERIFY(status);
+        const QStringList retiredControls{"Start Live Synchronization", "Stop Live Synchronization",
+            "Upload to Firebase", "Download from Firebase", "Auto Refresh", "Realtime (Test)", "Online prototype:"};
+        for (auto *object : window->findChildren<QObject *>()) {
+            const auto text = object->property("text").toString();
+            for (const auto &retired : retiredControls)
+                QVERIFY2(!text.contains(retired), qPrintable(text));
+        }
+        QVERIFY(!pages->isEnabled());
+        QVERIFY(!retry->isVisible());
+        firebase->offline();
+        QVERIFY(retry->isVisible());
+        QVERIFY(QMetaObject::invokeMethod(retry, "clicked"));
+        QCOMPARE(firebase->beginCalls, 2);
+        QVERIFY(!pages->isEnabled());
+        firebase->online();
+        emit firebase->initialDataVerified(2, {}, {});
+        QVERIFY(pages->isEnabled());
+        firebase->failItem();
+        QVERIFY(status->isVisible());
+        QVERIFY(status->property("text").toString().contains("Write denied"));
+        QCOMPARE(firebase->writeCalls, 0);
+    }
 };
 
 int main(int argc, char **argv)
